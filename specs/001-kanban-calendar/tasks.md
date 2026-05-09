@@ -121,21 +121,21 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T043 [P] [US3] Contract test for `POST /api/tasks` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskContractTests.cs`
-- [ ] T044 [P] [US3] Validation tests for CreateTaskCommand in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskValidationTests.cs`
-- [ ] T045 [P] [US3] Handler unit test for successful creation in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskHandlerTests.cs`
-- [ ] T046 [P] [US3] Frontend integration test for task creation in `frontend/tests/integration/CreateTask.test.tsx`
+- [X] T043 [P] [US3] Contract test for `POST /api/tasks` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskContractTests.cs`
+- [X] T044 [P] [US3] Validation tests for CreateTaskCommand in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskValidationTests.cs`
+- [X] T045 [P] [US3] Handler unit test for successful creation in `backend/tests/TaskTracker.UnitTests/Features/Tasks/CreateTask/CreateTaskHandlerTests.cs`
+- [X] T046 [P] [US3] Frontend integration test for task creation in `frontend/tests/integration/CreateTask.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T047 [P] [US3] Create `CreateTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/CreateTask/CreateTaskCommand.cs`
-- [ ] T048 [P] [US3] Create `CreateTaskValidator` in `backend/src/TaskTracker.Infrastructure/Validators/CreateTaskValidator.cs`
-- [ ] T049 [P] [US3] Create `CreateTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/CreateTask/CreateTaskHandler.cs`
-- [ ] T050 [US3] Add `TasksController.CreateTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
-- [ ] T051 [P] [US3] Create `CreateTaskModal` component in `frontend/src/components/TaskModal/CreateTaskModal.tsx`
-- [ ] T052 [US3] Add "create task" button (+) to `Column.tsx`
-- [ ] T053 [US3] Wire up form submission in `CreateTaskModal.tsx`
-- [ ] T054 [US3] Add optimistic update in `taskStore.ts` after create
+- [X] T047 [P] [US3] Create `CreateTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/CreateTask/CreateTaskCommand.cs`
+- [X] T048 [P] [US3] Create `CreateTaskValidator` in `backend/src/TaskTracker.Infrastructure/Validators/CreateTaskValidator.cs`
+- [X] T049 [P] [US3] Create `CreateTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/CreateTask/CreateTaskHandler.cs`
+- [X] T050 [US3] Add `TasksController.CreateTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
+- [X] T051 [P] [US3] Create `CreateTaskModal` component in `frontend/src/components/TaskModal/CreateTaskModal.tsx`
+- [X] T052 [US3] Add "create task" button (+) to `Column.tsx`
+- [X] T053 [US3] Wire up form submission in `CreateTaskModal.tsx`
+- [X] T054 [US3] Add optimistic update in `taskStore.ts` after create
 
 **Checkpoint**: User Story 3 complete — tasks can be created
 

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { TaskCard } from './TaskCard';
+import { CreateTaskModal } from './TaskModal/CreateTaskModal';
 import { Task, TaskStatus } from '../types/task';
 import { useTaskStore } from '../stores/taskStore';
 
@@ -9,30 +11,17 @@ interface ColumnProps {
 }
 
 export function Column({ status, title, tasks }: ColumnProps) {
-  const { addTask } = useTaskStore();
+  const { selectedDate, isCreateModalOpen, setIsCreateModalOpen } = useTaskStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateTask = () => {
-    const title = prompt('Enter task title:');
-    if (title) {
-      const newTask: Task = {
-        id: Date.now(),
-        title,
-        description: null,
-        status,
-        date: new Date().toISOString(),
-        order: tasks.length,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      addTask(newTask);
-    }
-  };
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="column" data-status={status}>
       <div className="column-header">
         <h2>{title}</h2>
-        <button onClick={handleCreateTask} aria-label={`Add task to ${title}`}>
+        <button onClick={openModal} aria-label={`Add task to ${title}`}>
           +
         </button>
       </div>
@@ -41,6 +30,12 @@ export function Column({ status, title, tasks }: ColumnProps) {
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
+      <CreateTaskModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        defaultDate={selectedDate}
+        defaultStatus={status}
+      />
     </div>
   );
 }

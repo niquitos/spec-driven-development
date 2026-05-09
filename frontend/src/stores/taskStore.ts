@@ -8,6 +8,7 @@ interface TaskState {
   selectedTaskIds: number[];
   isLoading: boolean;
   error: string | null;
+  isCreateModalOpen: boolean;
 
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
@@ -19,6 +20,8 @@ interface TaskState {
   moveTask: (id: number, newStatus: TaskStatus, newOrder: number) => void;
   reorderTask: (id: number, newOrder: number) => void;
   loadTasks: (date: Date) => Promise<void>;
+  createTask: (dto: CreateTaskDto) => Promise<void>;
+  setIsCreateModalOpen: (open: boolean) => void;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -27,6 +30,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   selectedTaskIds: [],
   isLoading: false,
   error: null,
+  isCreateModalOpen: false,
 
   setTasks: (tasks) => set({ tasks }),
 
@@ -79,4 +83,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         : task
     ),
   })),
+
+  createTask: async (dto) => {
+    const task = await taskApi.createTask(dto);
+    set((state) => ({ tasks: [...state.tasks, task] }));
+  },
+
+  setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
 }));
