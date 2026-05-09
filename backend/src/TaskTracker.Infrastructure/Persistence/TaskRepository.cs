@@ -15,9 +15,12 @@ public class TaskRepository : ITaskRepository
 
     public async Task<IEnumerable<TaskEntity>> GetByDateAsync(DateTime date, CancellationToken cancellationToken)
     {
-        var dateOnly = DateOnly.FromDateTime(date);
+        var utcDate = date.Kind == DateTimeKind.Unspecified
+       ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
+       : date.ToUniversalTime();
+
         return await _context.Tasks
-            .Where(t => t.Date.Date == date)
+            .Where(t => t.Date == utcDate.Date)
             .OrderBy(t => t.Order)
             .ToListAsync(cancellationToken);
     }
@@ -29,6 +32,20 @@ public class TaskRepository : ITaskRepository
 
     public async Task<TaskEntity> CreateAsync(TaskEntity task, CancellationToken cancellationToken)
     {
+        if (task.Date.Kind != DateTimeKind.Utc)
+        {
+            task.Date = DateTime.SpecifyKind(task.Date, DateTimeKind.Utc);
+        }
+        if (task.CreatedAt.Kind != DateTimeKind.Utc)
+        {
+            task.CreatedAt = DateTime.SpecifyKind(task.CreatedAt, DateTimeKind.Utc);
+        }
+
+        if (task.UpdatedAt.Kind != DateTimeKind.Utc)
+        {
+            task.UpdatedAt = DateTime.SpecifyKind(task.UpdatedAt, DateTimeKind.Utc);
+        }
+
         _context.Tasks.Add(task);
         await _context.SaveChangesAsync(cancellationToken);
         return task;

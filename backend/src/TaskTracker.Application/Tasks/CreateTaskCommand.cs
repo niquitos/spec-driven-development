@@ -50,7 +50,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskE
             Title = request.Title,
             Description = request.Description,
             Date = request.Date,
-            Status = (Domain.TaskStatus)request.Status,
+            Status = request.Status,
             Order = request.Order,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

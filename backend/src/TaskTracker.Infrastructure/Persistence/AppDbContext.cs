@@ -5,11 +5,25 @@ namespace TaskTracker.Infrastructure.Persistence;
 
 public class AppDbContext : DbContext
 {
+    // Add this parameterless constructor for design-time
+    public AppDbContext()
+    {
+    }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 
-    public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
+    public DbSet<TaskEntity> Tasks { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Only configure if not already configured (for design-time)
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=tasktracker;Username=postgres;Password=postgres");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +31,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<TaskEntity>(entity =>
         {
+            entity.ToTable("tasks");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(2000);
