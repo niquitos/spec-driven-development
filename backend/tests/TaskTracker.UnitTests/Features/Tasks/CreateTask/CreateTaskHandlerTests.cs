@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
 using TaskTracker.Application.Tasks;
-using TaskTracker.Domain;
+using Domain = TaskTracker.Domain;
 
 namespace TaskTracker.UnitTests.Features.Tasks.CreateTask;
 
@@ -12,20 +12,20 @@ public class CreateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
-        var createdTask = new TaskEntity
+        var createdTask = new Domain.TaskEntity
         {
             Id = 1,
             Title = "Test Task",
             Description = "Test Description",
             Date = DateTime.Today,
-            Status = TaskStatus.New,
+            Status = Domain.TaskStatus.New,
             Order = 0,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
         mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdTask);
 
         var handler = new CreateTaskCommandHandler(mockRepository.Object);
@@ -33,7 +33,7 @@ public class CreateTaskHandlerTests
             "Test Task",
             "Test Description",
             DateTime.Today,
-            TaskStatus.New,
+            Domain.TaskStatus.New,
             0
         );
 
@@ -45,7 +45,7 @@ public class CreateTaskHandlerTests
         Assert.Equal(1, result.Id);
         Assert.Equal("Test Task", result.Title);
         Assert.Equal("Test Description", result.Description);
-        mockRepository.Verify(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockRepository.Verify(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -53,19 +53,19 @@ public class CreateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
-        TaskEntity? capturedTask = null;
+        Domain.TaskEntity? capturedTask = null;
 
         mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()))
-            .Callback<TaskEntity, CancellationToken>((t, _) => capturedTask = t)
-            .ReturnsAsync(new TaskEntity { Id = 1 });
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
         var handler = new CreateTaskCommandHandler(mockRepository.Object);
         var command = new CreateTaskCommand(
             "Test Task",
             null,
             DateTime.Today,
-            TaskStatus.New,
+            Domain.TaskStatus.New,
             0
         );
 
@@ -82,19 +82,19 @@ public class CreateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
-        TaskEntity? capturedTask = null;
+        Domain.TaskEntity? capturedTask = null;
 
         mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()))
-            .Callback<TaskEntity, CancellationToken>((t, _) => capturedTask = t)
-            .ReturnsAsync(new TaskEntity { Id = 1 });
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
         var handler = new CreateTaskCommandHandler(mockRepository.Object);
         var command = new CreateTaskCommand(
             "Test Task",
             null,
             DateTime.Today,
-            TaskStatus.New,
+            Domain.TaskStatus.New,
             0
         );
 
@@ -111,19 +111,19 @@ public class CreateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
-        TaskEntity? capturedTask = null;
+        Domain.TaskEntity? capturedTask = null;
 
         mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()))
-            .Callback<TaskEntity, CancellationToken>((t, _) => capturedTask = t)
-            .ReturnsAsync(new TaskEntity { Id = 1 });
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
         var handler = new CreateTaskCommandHandler(mockRepository.Object);
         var command = new CreateTaskCommand(
             "Test Task",
             null,
             DateTime.Today,
-            TaskStatus.InProgress,
+            Domain.TaskStatus.InProgress,
             0
         );
 
@@ -132,7 +132,7 @@ public class CreateTaskHandlerTests
 
         // Assert
         Assert.NotNull(capturedTask);
-        Assert.Equal(TaskStatus.InProgress, capturedTask.Status);
+        Assert.Equal(Domain.TaskStatus.InProgress, capturedTask.Status);
     }
 
     [Fact]
@@ -140,19 +140,19 @@ public class CreateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
-        TaskEntity? capturedTask = null;
+        Domain.TaskEntity? capturedTask = null;
 
         mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<TaskEntity>(), It.IsAny<CancellationToken>()))
-            .Callback<TaskEntity, CancellationToken>((t, _) => capturedTask = t)
-            .ReturnsAsync(new TaskEntity { Id = 1 });
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
         var handler = new CreateTaskCommandHandler(mockRepository.Object);
         var command = new CreateTaskCommand(
             "Test Task",
             null,
             DateTime.Today,
-            TaskStatus.New,
+            Domain.TaskStatus.New,
             5
         );
 

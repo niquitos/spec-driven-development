@@ -149,22 +149,22 @@
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T055 [P] [US4] Contract test for `PUT /api/tasks/{id}` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTask/UpdateTaskContractTests.cs`
-- [ ] T056 [P] [US4] Handler unit test for UpdateTask in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTask/UpdateTaskHandlerTests.cs`
-- [ ] T057 [P] [US4] Frontend integration test for edit flow in `frontend/tests/integration/EditTask.test.tsx`
+- [X] T055 [P] [US4] Contract test for `PUT /api/tasks/{id}` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTask/UpdateTaskContractTests.cs`
+- [X] T056 [P] [US4] Handler unit test for UpdateTask in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTask/UpdateTaskHandlerTests.cs`
+- [X] T057 [P] [US4] Frontend integration test for edit flow in `frontend/tests/integration/EditTask.test.tsx`
 
 ### Implementation for User Story 4
 
-- [ ] T058 [P] [US4] Create `UpdateTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTask/UpdateTaskCommand.cs`
-- [ ] T059 [P] [US4] Create `UpdateTaskValidator` in `backend/src/TaskTracker.Infrastructure/Validators/UpdateTaskValidator.cs`
-- [ ] T060 [P] [US4] Create `UpdateTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTask/UpdateTaskHandler.cs`
-- [ ] T061 [US4] Add `TasksController.UpdateTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
-- [ ] T062 [P] [US4] Create `EditTaskModal` component in `frontend/src/components/TaskModal/EditTaskModal.tsx`
-- [ ] T063 [US4] Add pencil icon to `TaskCard.tsx`
-- [ ] T064 [US4] Wire up edit form with pre-populated data
-- [ ] T065 [P] [US4] Create `UpdateTaskDateCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskDate/UpdateTaskDateCommand.cs`
-- [ ] T066 [P] [US4] Create `UpdateTaskDateHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskDate/UpdateTaskDateHandler.cs`
-- [ ] T067 [US4] Add date change handling (triggers re-fetch) in `EditTaskModal.tsx`
+- [X] T058 [P] [US4] Create `UpdateTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTask/UpdateTaskCommand.cs`
+- [X] T059 [P] [US4] Create `UpdateTaskValidator` in `backend/src/TaskTracker.Infrastructure/Validators/UpdateTaskValidator.cs`
+- [X] T060 [P] [US4] Create `UpdateTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTask/UpdateTaskHandler.cs`
+- [X] T061 [US4] Add `TasksController.UpdateTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
+- [X] T062 [P] [US4] Create `EditTaskModal` component in `frontend/src/components/TaskModal/EditTaskModal.tsx`
+- [X] T063 [US4] Add pencil icon to `TaskCard.tsx`
+- [X] T064 [US4] Wire up edit form with pre-populated data
+- [X] T065 [P] [US4] Create `UpdateTaskDateCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskDate/UpdateTaskDateCommand.cs`
+- [X] T066 [P] [US4] Create `UpdateTaskDateHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskDate/UpdateTaskDateHandler.cs`
+- [X] T067 [US4] Add date change handling (triggers re-fetch) in `EditTaskModal.tsx`
 
 **Checkpoint**: User Story 4 complete — tasks can be edited
 
@@ -178,19 +178,19 @@
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T068 [P] [US5] Contract test for `DELETE /api/tasks/{id}` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/DeleteTask/DeleteTaskContractTests.cs`
-- [ ] T069 [P] [US5] Handler unit test for DeleteTask in `backend/tests/TaskTracker.UnitTests/Features/Tasks/DeleteTask/DeleteTaskHandlerTests.cs`
-- [ ] T070 [P] [US5] Frontend integration test for delete confirmation in `frontend/tests/integration/DeleteTask.test.tsx`
+- [X] T068 [P] [US5] Contract test for `DELETE /api/tasks/{id}` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/DeleteTask/DeleteTaskContractTests.cs`
+- [X] T069 [P] [US5] Handler unit test for DeleteTask in `backend/tests/TaskTracker.UnitTests/Features/Tasks/DeleteTask/DeleteTaskHandlerTests.cs`
+- [X] T070 [P] [US5] Frontend integration test for delete confirmation in `frontend/tests/integration/DeleteTask.test.tsx`
 
 ### Implementation for User Story 5
 
-- [ ] T071 [P] [US5] Create `DeleteTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/DeleteTask/DeleteTaskCommand.cs`
-- [ ] T072 [P] [US5] Create `DeleteTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/DeleteTask/DeleteTaskHandler.cs`
-- [ ] T073 [US5] Add `TasksController.DeleteTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
-- [ ] T074 [P] [US5] Create `DeleteConfirmModal` component in `frontend/src/components/TaskModal/DeleteConfirmModal.tsx`
-- [ ] T075 [US5] Add trash icon to `TaskCard.tsx`
-- [ ] T076 [US5] Wire up delete confirmation flow
-- [ ] T077 [US5] Add optimistic removal in `taskStore.ts`
+- [X] T071 [P] [US5] Create `DeleteTaskCommand` in `backend/src/TaskTracker.Application/Features/Tasks/DeleteTask/DeleteTaskCommand.cs`
+- [X] T072 [P] [US5] Create `DeleteTaskHandler` in `backend/src/TaskTracker.Application/Features/Tasks/DeleteTask/DeleteTaskHandler.cs`
+- [X] T073 [US5] Add `TasksController.DeleteTask` endpoint in `backend/src/TaskTracker.Api/Controllers/TasksController.cs`
+- [X] T074 [P] [US5] Create `DeleteConfirmModal` component in `frontend/src/components/TaskModal/DeleteConfirmModal.tsx`
+- [X] T075 [US5] Add trash icon to `TaskCard.tsx`
+- [X] T076 [US5] Wire up delete confirmation flow
+- [X] T077 [US5] Add optimistic removal in `taskStore.ts`
 
 **Checkpoint**: User Story 5 complete — tasks can be deleted
 

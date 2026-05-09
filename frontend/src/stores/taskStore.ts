@@ -9,10 +9,11 @@ interface TaskState {
   isLoading: boolean;
   error: string | null;
   isCreateModalOpen: boolean;
+  editingTask: Task | null;
 
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
-  updateTask: (id: number, updates: UpdateTaskDto) => void;
+  updateTask: (id: number, updates: UpdateTaskDto) => Promise<void>;
   deleteTask: (id: number) => void;
   setSelectedDate: (date: Date) => void;
   toggleTaskSelection: (id: number) => void;
@@ -22,6 +23,7 @@ interface TaskState {
   loadTasks: (date: Date) => Promise<void>;
   createTask: (dto: CreateTaskDto) => Promise<void>;
   setIsCreateModalOpen: (open: boolean) => void;
+  setEditingTask: (task: Task | null) => void;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -31,6 +33,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   isLoading: false,
   error: null,
   isCreateModalOpen: false,
+  editingTask: null,
 
   setTasks: (tasks) => set({ tasks }),
 
@@ -47,11 +50,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
 
-  updateTask: (id, updates) => set((state) => ({
-    tasks: state.tasks.map((task) =>
-      task.id === id ? { ...task, ...updates, updatedAt: new Date().toISOString() } : task
-    ),
-  })),
+  updateTask: async (id, updates) => {
+    await taskApi.updateTask(id, updates);
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id ? { ...task, ...updates, updatedAt: new Date().toISOString() } : task
+      ),
+    }));
+  },
+
+  setEditingTask: (task) => set({ editingTask: task }),
 
   deleteTask: (id) => set((state) => ({
     tasks: state.tasks.filter((task) => task.id !== id),
