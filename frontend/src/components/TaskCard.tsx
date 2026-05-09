@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Task } from '../types/task';
 import { useTaskStore } from '../stores/taskStore';
 import { EditTaskModal } from './TaskModal/EditTaskModal';
@@ -12,6 +14,25 @@ export function TaskCard({ task }: TaskCardProps) {
   const { deleteTask } = useTaskStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: task.id,
+    data: {
+      taskId: task.id,
+      status: task.status,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const handleEdit = () => {
     setIsEditModalOpen(true);
@@ -27,7 +48,13 @@ export function TaskCard({ task }: TaskCardProps) {
 
   return (
     <>
-      <div className="task-card" draggable>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="task-card"
+        {...attributes}
+        {...listeners}
+      >
         <div className="task-card-header">
           <div className="task-card-actions">
             <button onClick={handleEdit} aria-label={`Edit task ${task.title}`}>

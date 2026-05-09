@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import { TaskCard } from './TaskCard';
 import { CreateTaskModal } from './TaskModal/CreateTaskModal';
 import { Task, TaskStatus } from '../types/task';
@@ -13,12 +14,20 @@ interface ColumnProps {
 export function Column({ status, title, tasks }: ColumnProps) {
   const { selectedDate, isCreateModalOpen, setIsCreateModalOpen } = useTaskStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+    data: { status },
+  });
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div className="column" data-status={status}>
+    <div
+      className={`column ${isOver ? 'column-drag-over' : ''}`}
+      data-status={status}
+      ref={setNodeRef}
+    >
       <div className="column-header">
         <h2>{title}</h2>
         <button onClick={openModal} aria-label={`Add task to ${title}`}>

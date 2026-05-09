@@ -204,19 +204,19 @@
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T078 [P] [US6] Contract test for `PATCH /api/tasks/{id}/status` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusContractTests.cs`
-- [ ] T079 [P] [US6] Frontend integration test for drag-n-drop in `frontend/tests/integration/DragDrop.test.tsx`
+- [X] T078 [P] [US6] Contract test for `PATCH /api/tasks/{id}/status` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusContractTests.cs`
+- [X] T079 [P] [US6] Frontend integration test for drag-n-drop in `frontend/tests/integration/DragDrop.test.tsx`
 
 ### Implementation for User Story 6
 
-- [ ] T080 [P] [US6] Add `@dnd-kit/core` and `@dnd-kit/sortable` to `frontend/package.json`
-- [ ] T081 [P] [US6] Create `useDragDrop` hook in `frontend/src/hooks/useDragDrop.ts`
-- [ ] T082 [US6] Wrap `Board` with `DndContext`
-- [ ] T083 [US6] Make `TaskCard` draggable with `useSortable`
-- [ ] T084 [US6] Implement `handleDragEnd` for status change
-- [ ] T085 [P] [US6] Create `UpdateTaskStatusCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusCommand.cs`
-- [ ] T086 [P] [US6] Create `UpdateTaskStatusHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusHandler.cs`
-- [ ] T087 [US6] Add `TasksController.UpdateTaskStatus` endpoint
+- [X] T080 [P] [US6] Add `@dnd-kit/core` and `@dnd-kit/sortable` to `frontend/package.json`
+- [X] T081 [P] [US6] Create `useDragDrop` hook in `frontend/src/hooks/useDragDrop.ts`
+- [X] T082 [US6] Wrap `Board` with `DndContext`
+- [X] T083 [US6] Make `TaskCard` draggable with `useSortable`
+- [X] T084 [US6] Implement `handleDragEnd` for status change
+- [X] T085 [P] [US6] Create `UpdateTaskStatusCommand` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusCommand.cs`
+- [X] T086 [P] [US6] Create `UpdateTaskStatusHandler` in `backend/src/TaskTracker.Application/Features/Tasks/UpdateTaskStatus/UpdateTaskStatusHandler.cs`
+- [X] T087 [US6] Add `TasksController.UpdateTaskStatus` endpoint
 
 **Checkpoint**: User Story 6 complete — drag-n-drop functional
 

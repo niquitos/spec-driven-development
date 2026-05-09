@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { useTaskStore } from '../stores/taskStore';
 import { Column } from './Column';
 import { TaskStatus } from '../types/task';
@@ -10,7 +11,7 @@ const columns: { status: TaskStatus; title: string }[] = [
 ];
 
 export function Board() {
-  const { tasks, selectedDate, loadTasks, setSelectedDate } = useTaskStore();
+  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask } = useTaskStore();
 
   useEffect(() => {
     loadTasks(selectedDate);
@@ -38,20 +39,35 @@ export function Board() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || !active.data.current) return;
+
+    const taskId = active.data.current.taskId as number;
+    const newStatus = over.data.current?.status as TaskStatus | undefined;
+
+    if (taskId && newStatus) {
+      moveTask(taskId, newStatus, 0);
+    }
+  };
+
   const dateTasks = tasks.filter(
     (task) => new Date(task.date).toDateString() === selectedDate.toDateString()
   );
 
   return (
-    <div className="board">
-      {columns.map((column) => (
-        <Column
-          key={column.status}
-          status={column.status}
-          title={column.title}
-          tasks={dateTasks.filter((t) => t.status === column.status)}
-        />
-      ))}
-    </div>
+    <DndContext onDragEnd={handleDragEnd}>
+      <div className="board">
+        {columns.map((column) => (
+          <Column
+            key={column.status}
+            status={column.status}
+            title={column.title}
+            tasks={dateTasks.filter((t) => t.status === column.status)}
+          />
+        ))}
+      </div>
+    </DndContext>
   );
 }
