@@ -433,3 +433,15 @@ FodyWeavers.xsd
 
 # GitHub Spec Kit
 .specify/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Frontend build
+frontend/dist/
+frontend/node_modules/
+
+# Environment files
+*.env
+*.env.local
