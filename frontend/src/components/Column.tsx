@@ -12,7 +12,7 @@ interface ColumnProps {
 }
 
 export function Column({ status, title, tasks }: ColumnProps) {
-  const { selectedDate, isCreateModalOpen, setIsCreateModalOpen } = useTaskStore();
+  const { selectedDate } = useTaskStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { setNodeRef, isOver } = useDroppable({
     id: status,

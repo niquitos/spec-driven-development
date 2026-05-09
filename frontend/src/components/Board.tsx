@@ -19,7 +19,7 @@ export function Board() {
 
   // Keyboard navigation for dates (ArrowLeft/ArrowRight)
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButton) {
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) {
       return; // Don't interfere with input focus
     }
 

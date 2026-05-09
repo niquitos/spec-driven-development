@@ -35,8 +35,8 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
     try {
       await createTask({
         title,
-        description: description || null,
-        date: new Date(date),
+        description: description || undefined,
+        date,
         status: defaultStatus,
         order: 0,
       });

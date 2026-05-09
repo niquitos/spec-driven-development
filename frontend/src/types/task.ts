@@ -20,6 +20,7 @@ export interface CreateTaskDto {
   description?: string;
   date: string;
   status: TaskStatus;
+  order?: number;
 }
 
 export interface UpdateTaskDto {

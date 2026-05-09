@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DragEndEvent } from '@dnd-kit/core';
 import { useTaskStore } from '../stores/taskStore';
 import { TaskStatus } from '../types/task';
 
 export function useDragDrop() {
-  const { moveTask, loadTasks, selectedDate } = useTaskStore();
+  const { moveTask } = useTaskStore();
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = () => {

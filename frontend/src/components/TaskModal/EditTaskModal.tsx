@@ -36,8 +36,8 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
     try {
       const updates: UpdateTaskDto = {
         title: title.trim(),
-        description: description || null,
-        date: new Date(date),
+        description: description || undefined,
+        date,
       };
 
       await updateTask(task.id, updates);

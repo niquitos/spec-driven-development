@@ -26,7 +26,7 @@ interface TaskState {
   setEditingTask: (task: Task | null) => void;
 }
 
-export const useTaskStore = create<TaskState>((set, get) => ({
+export const useTaskStore = create<TaskState>((set) => ({
   tasks: [],
   selectedDate: new Date(),
   selectedTaskIds: [],
