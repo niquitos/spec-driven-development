@@ -98,16 +98,16 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T036 [P] [US2] Unit test for DateNavigator previous/next logic in `frontend/tests/unit/DateNavigator.test.tsx`
-- [ ] T037 [P] [US2] Integration test for date change triggering task reload in `frontend/tests/integration/DateNavigation.test.tsx`
+- [X] T036 [P] [US2] Unit test for DateNavigator previous/next logic in `frontend/tests/unit/DateNavigator.test.tsx`
+- [X] T037 [P] [US2] Integration test for date change triggering task reload in `frontend/tests/integration/DateNavigation.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Add `date-fns` dependency to `frontend/package.json`
-- [ ] T039 [P] [US2] Create `DatePicker` component in `frontend/src/components/Header/DatePicker.tsx`
-- [ ] T040 [US2] Add date state management in `frontend/src/stores/taskStore.ts`
-- [ ] T041 [US2] Wire up navigation buttons in `DateNavigator.tsx`
-- [ ] T042 [US2] Update `Board` component to use selected date from store
+- [X] T038 [P] [US2] Add `date-fns` dependency to `frontend/package.json`
+- [X] T039 [P] [US2] Create `DatePicker` component in `frontend/src/components/Header.tsx` (native date input)
+- [X] T040 [US2] Add date state management in `frontend/src/stores/taskStore.ts`
+- [X] T041 [US2] Wire up navigation buttons in `Header.tsx`
+- [X] T042 [US2] Update `Board` component to use selected date from store
 
 **Checkpoint**: User Story 2 complete — date navigation functional
 
