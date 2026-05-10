@@ -14,6 +14,8 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<UpdateTaskCommand, TaskEntity> _updateHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<MoveTaskCommand, TaskEntity> _moveHandler;
+    private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
+    private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
 
     public TasksController(
@@ -22,6 +24,8 @@ public class TasksController : ControllerBase
         IRequestHandler<UpdateTaskCommand, TaskEntity> updateHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<MoveTaskCommand, TaskEntity> moveHandler,
+        IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
+        IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
         IValidator<CreateTaskCommand> validator)
     {
         _getTasksHandler = getTasksHandler;
@@ -29,6 +33,8 @@ public class TasksController : ControllerBase
         _updateHandler = updateHandler;
         _deleteHandler = deleteHandler;
         _moveHandler = moveHandler;
+        _bulkDeleteHandler = bulkDeleteHandler;
+        _bulkMoveHandler = bulkMoveHandler;
         _validator = validator;
     }
 
@@ -101,6 +107,22 @@ public class TasksController : ControllerBase
         var task = await _moveHandler.Handle(command, CancellationToken.None);
         return Ok(task);
     }
+
+    [HttpPost("bulk/delete")]
+    public async Task<ActionResult<BulkDeleteResponse>> BulkDelete([FromBody] BulkDeleteRequest request)
+    {
+        var command = new BulkDeleteCommand(request.TaskIds);
+        var result = await _bulkDeleteHandler.Handle(command, CancellationToken.None);
+        return Ok(result);
+    }
+
+    [HttpPost("bulk/move")]
+    public async Task<ActionResult<BulkMoveResponse>> BulkMove([FromBody] BulkMoveRequest request)
+    {
+        var command = new BulkMoveCommand(request.TaskIds, request.TargetDate);
+        var result = await _bulkMoveHandler.Handle(command, CancellationToken.None);
+        return Ok(result);
+    }
 }
 
 public record CreateTaskRequest(
@@ -121,4 +143,13 @@ public record UpdateTaskRequest(
 public record MoveTaskRequest(
     Domain.TaskStatus Status,
     int Order
+);
+
+public record BulkDeleteRequest(
+    IList<int> TaskIds
+);
+
+public record BulkMoveRequest(
+    IList<int> TaskIds,
+    DateTime TargetDate
 );

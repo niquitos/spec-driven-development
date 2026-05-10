@@ -230,23 +230,23 @@
 
 ### Tests for User Story 7 ⚠️
 
-- [ ] T088 [P] [US7] Contract test for `POST /api/tasks/bulk/delete` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/BulkDelete/BulkDeleteContractTests.cs`
-- [ ] T089 [P] [US7] Contract test for `POST /api/tasks/bulk/move` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/BulkMove/BulkMoveContractTests.cs`
-- [ ] T090 [P] [US7] Frontend integration test for bulk selection in `frontend/tests/integration/BulkActions.test.tsx`
+- [X] T088 [P] [US7] Contract test for `POST /api/tasks/bulk/delete` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/BulkDelete/BulkDeleteContractTests.cs`
+- [X] T089 [P] [US7] Contract test for `POST /api/tasks/bulk/move` in `backend/tests/TaskTracker.UnitTests/Features/Tasks/BulkMove/BulkMoveContractTests.cs`
+- [X] T090 [P] [US7] Frontend integration test for bulk selection in `frontend/tests/integration/BulkActions.test.tsx`
 
 ### Implementation for User Story 7
 
-- [ ] T091 [P] [US7] Create `BulkDeleteCommand` in `backend/src/TaskTracker.Application/Features/Tasks/BulkDelete/BulkDeleteCommand.cs`
-- [ ] T092 [P] [US7] Create `BulkDeleteHandler` in `backend/src/TaskTracker.Application/Features/Tasks/BulkDelete/BulkDeleteHandler.cs`
-- [ ] T093 [P] [US7] Create `BulkMoveCommand` in `backend/src/TaskTracker.Application/Features/Tasks/BulkMove/BulkMoveCommand.cs`
-- [ ] T094 [P] [US7] Create `BulkMoveHandler` in `backend/src/TaskTracker.Application/Features/Tasks/BulkMove/BulkMoveHandler.cs`
-- [ ] T095 [US7] Add `TasksController.BulkDelete` endpoint
-- [ ] T096 [US7] Add `TasksController.BulkMove` endpoint
-- [ ] T097 [P] [US7] Create checkbox component in `frontend/src/components/Board/TaskCheckbox.tsx`
-- [ ] T098 [US7] Add selection state to `taskStore.ts`
-- [ ] T099 [US7] Create `BulkActionsPanel` component in `frontend/src/components/BulkActions/BulkActionsPanel.tsx`
-- [ ] T100 [US7] Wire up bulk delete action
-- [ ] T101 [US7] Wire up bulk move action
+- [X] T091 [P] [US7] Create `BulkDeleteCommand` in `backend/src/TaskTracker.Application/Features/Tasks/BulkDelete/BulkDeleteCommand.cs`
+- [X] T092 [P] [US7] Create `BulkDeleteHandler` in `backend/src/TaskTracker.Application/Features/Tasks/BulkDelete/BulkDeleteHandler.cs`
+- [X] T093 [P] [US7] Create `BulkMoveCommand` in `backend/src/TaskTracker.Application/Features/Tasks/BulkMove/BulkMoveCommand.cs`
+- [X] T094 [P] [US7] Create `BulkMoveHandler` in `backend/src/TaskTracker.Application/Features/Tasks/BulkMove/BulkMoveHandler.cs`
+- [X] T095 [US7] Add `TasksController.BulkDelete` endpoint
+- [X] T096 [US7] Add `TasksController.BulkMove` endpoint
+- [X] T097 [P] [US7] Create checkbox component in `frontend/src/components/Board/TaskCheckbox.tsx`
+- [X] T098 [US7] Add selection state to `taskStore.ts`
+- [X] T099 [US7] Create `BulkActionsPanel` component in `frontend/src/components/BulkActions/BulkActionsPanel.tsx`
+- [X] T100 [US7] Wire up bulk delete action
+- [X] T101 [US7] Wire up bulk move action
 
 **Checkpoint**: User Story 7 complete — bulk operations functional
 

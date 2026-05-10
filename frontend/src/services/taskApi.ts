@@ -30,11 +30,13 @@ export const taskApi = {
     return response.data;
   },
 
-  async bulkDelete(ids: number[]): Promise<void> {
-    await api.post('/tasks/bulk-delete', { ids });
+  async bulkDelete(taskIds: number[]): Promise<{ deleted: number }> {
+    const response = await api.post<{ deleted: number }>('/tasks/bulk/delete', { taskIds });
+    return response.data;
   },
 
-  async bulkMove(ids: number[], status: TaskStatus): Promise<void> {
-    await api.post('/tasks/bulk-move', { ids, status });
+  async bulkMove(taskIds: number[], targetDate: string): Promise<{ moved: number; targetDate: string }> {
+    const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move', { taskIds, targetDate });
+    return response.data;
   },
 };

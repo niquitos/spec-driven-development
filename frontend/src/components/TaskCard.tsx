@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Task } from '../types/task';
 import { useTaskStore } from '../stores/taskStore';
+import { TaskCheckbox } from './Board/TaskCheckbox';
 import { EditTaskModal } from './TaskModal/EditTaskModal';
 import { DeleteConfirmModal } from './TaskModal/DeleteConfirmModal';
 
@@ -56,6 +57,7 @@ export function TaskCard({ task }: TaskCardProps) {
         {...listeners}
       >
         <div className="task-card-header">
+          <TaskCheckbox taskId={task.id} />
           <div className="task-card-actions">
             <button onClick={handleEdit} aria-label={`Edit task ${task.title}`}>
               ✏️

@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { useTaskStore } from '../stores/taskStore';
 import { Column } from './Column';
+import { BulkActionsPanel } from './BulkActions/BulkActionsPanel';
 import { TaskStatus } from '../types/task';
 
 const columns: { status: TaskStatus; title: string }[] = [
@@ -58,15 +59,18 @@ export function Board() {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="board">
-        {columns.map((column) => (
-          <Column
-            key={column.status}
-            status={column.status}
-            title={column.title}
-            tasks={dateTasks.filter((t) => t.status === column.status)}
-          />
-        ))}
+      <div className="board-container">
+        <BulkActionsPanel />
+        <div className="board">
+          {columns.map((column) => (
+            <Column
+              key={column.status}
+              status={column.status}
+              title={column.title}
+              tasks={dateTasks.filter((t) => t.status === column.status)}
+            />
+          ))}
+        </div>
       </div>
     </DndContext>
   );

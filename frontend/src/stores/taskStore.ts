@@ -24,6 +24,8 @@ interface TaskState {
   createTask: (dto: CreateTaskDto) => Promise<void>;
   setIsCreateModalOpen: (open: boolean) => void;
   setEditingTask: (task: Task | null) => void;
+  bulkDelete: () => Promise<void>;
+  bulkMove: (targetDate: Date) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
@@ -98,4 +100,27 @@ export const useTaskStore = create<TaskState>((set) => ({
   },
 
   setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
+
+  bulkDelete: async () => {
+    const { selectedTaskIds } = useTaskStore.getState();
+    if (selectedTaskIds.length === 0) return;
+    
+    await taskApi.bulkDelete(selectedTaskIds);
+    set((state) => ({
+      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+      selectedTaskIds: [],
+    }));
+  },
+
+  bulkMove: async (targetDate) => {
+    const { selectedTaskIds } = useTaskStore.getState();
+    if (selectedTaskIds.length === 0) return;
+    
+    const dateStr = targetDate.toISOString().split('T')[0];
+    await taskApi.bulkMove(selectedTaskIds, dateStr);
+    set((state) => ({
+      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+      selectedTaskIds: [],
+    }));
+  },
 }));
