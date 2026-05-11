@@ -2,6 +2,28 @@ import { create } from 'zustand';
 import { Task, TaskStatus, CreateTaskDto, UpdateTaskDto } from '../types/task';
 import { taskApi } from '../services/taskApi';
 
+// Получаем дату из URL или возвращаем сегодня
+function getInitialDate(): Date {
+  const params = new URLSearchParams(window.location.search);
+  const dateParam = params.get('date');
+  if (dateParam) {
+    const parsed = new Date(dateParam);
+    if (!isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  return new Date();
+}
+
+// Обновляем URL при изменении даты
+function updateUrlDate(date: Date) {
+  const params = new URLSearchParams(window.location.search);
+  const dateStr = date.toISOString().split('T')[0];
+  params.set('date', dateStr);
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', newUrl);
+}
+
 interface TaskState {
   tasks: Task[];
   selectedDate: Date;
@@ -18,7 +40,7 @@ interface TaskState {
   setSelectedDate: (date: Date) => void;
   toggleTaskSelection: (id: number) => void;
   clearSelection: () => void;
-  moveTask: (id: number, newStatus: TaskStatus, newOrder: number) => void;
+  moveTask: (id: number, newStatus: TaskStatus, newOrder: number) => Promise<void>;
   reorderTask: (id: number, newOrder: number) => void;
   loadTasks: (date: Date) => Promise<void>;
   createTask: (dto: CreateTaskDto) => Promise<void>;
@@ -30,7 +52,7 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: [],
-  selectedDate: new Date(),
+  selectedDate: getInitialDate(),
   selectedTaskIds: [],
   isLoading: false,
   error: null,
@@ -68,7 +90,10 @@ export const useTaskStore = create<TaskState>((set) => ({
     selectedTaskIds: state.selectedTaskIds.filter((taskId) => taskId !== id),
   })),
 
-  setSelectedDate: (date) => set({ selectedDate: date }),
+  setSelectedDate: (date) => {
+    updateUrlDate(date);
+    set({ selectedDate: date });
+  },
 
   toggleTaskSelection: (id) => set((state) => ({
     selectedTaskIds: state.selectedTaskIds.includes(id)
@@ -78,13 +103,28 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   clearSelection: () => set({ selectedTaskIds: [] }),
 
-  moveTask: (id, newStatus, newOrder) => set((state) => ({
-    tasks: state.tasks.map((task) =>
-      task.id === id
-        ? { ...task, status: newStatus, order: newOrder, updatedAt: new Date().toISOString() }
-        : task
-    ),
-  })),
+  moveTask: async (id, newStatus, newOrder) => {
+    const state = useTaskStore.getState();
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+
+    // Сначала оптимистично обновляем UI
+    set((state) => ({
+      tasks: state.tasks.map((t) =>
+        t.id === id
+          ? { ...t, status: newStatus, order: newOrder, updatedAt: new Date().toISOString() }
+          : t
+      ),
+    }));
+    // Затем отправляем полное обновление задачи
+    await taskApi.updateTask(id, {
+      title: task.title,
+      description: task.description ?? undefined,
+      date: task.date,
+      status: newStatus,
+      order: newOrder,
+    });
+  },
 
   reorderTask: (id, newOrder) => set((state) => ({
     tasks: state.tasks.map((task) =>

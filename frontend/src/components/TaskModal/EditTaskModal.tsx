@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
-import { Task, UpdateTaskDto } from '../../types/task';
+import { Task, TaskStatus, UpdateTaskDto } from '../../types/task';
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
+  const [status, setStatus] = useState<TaskStatus>(TaskStatus.New);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,6 +22,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
       setTitle(task.title);
       setDescription(task.description || '');
       setDate(new Date(task.date).toISOString().split('T')[0]);
+      setStatus(task.status);
       setError(null);
       setIsSubmitting(false);
     }
@@ -38,6 +40,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
         title: title.trim(),
         description: description || undefined,
         date,
+        status,
       };
 
       await updateTask(task.id, updates);
@@ -101,6 +104,20 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
               className="form-input"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edit-task-status" className="form-label">Статус</label>
+            <select
+              id="edit-task-status"
+              value={status}
+              onChange={(e) => setStatus(Number(e.target.value) as TaskStatus)}
+              className="form-input"
+            >
+              <option value={TaskStatus.New}>Новые</option>
+              <option value={TaskStatus.InProgress}>В процессе</option>
+              <option value={TaskStatus.Done}>Сделаны</option>
+            </select>
           </div>
 
           {error && (

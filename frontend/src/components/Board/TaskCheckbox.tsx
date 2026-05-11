@@ -1,14 +1,14 @@
 import { useTaskStore } from '../../stores/taskStore';
 
 interface TaskCheckboxProps {
-  taskId: string;
+  taskId: number;
 }
 
 export function TaskCheckbox({ taskId }: TaskCheckboxProps) {
   const { selectedTaskIds, toggleTaskSelection } = useTaskStore();
   const isSelected = selectedTaskIds.includes(taskId);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = () => {
     toggleTaskSelection(taskId);
   };
 

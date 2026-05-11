@@ -13,7 +13,6 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<CreateTaskCommand, TaskEntity> _createHandler;
     private readonly IRequestHandler<UpdateTaskCommand, TaskEntity> _updateHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
-    private readonly IRequestHandler<MoveTaskCommand, TaskEntity> _moveHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
@@ -23,7 +22,6 @@ public class TasksController : ControllerBase
         IRequestHandler<CreateTaskCommand, TaskEntity> createHandler,
         IRequestHandler<UpdateTaskCommand, TaskEntity> updateHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
-        IRequestHandler<MoveTaskCommand, TaskEntity> moveHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
         IValidator<CreateTaskCommand> validator)
@@ -32,7 +30,6 @@ public class TasksController : ControllerBase
         _createHandler = createHandler;
         _updateHandler = updateHandler;
         _deleteHandler = deleteHandler;
-        _moveHandler = moveHandler;
         _bulkDeleteHandler = bulkDeleteHandler;
         _bulkMoveHandler = bulkMoveHandler;
         _validator = validator;
@@ -86,7 +83,8 @@ public class TasksController : ControllerBase
             request.Title,
             request.Description,
             request.Date,
-            request.Status
+            request.Status,
+            request.Order
         );
 
         var task = await _updateHandler.Handle(command, CancellationToken.None);
@@ -98,14 +96,6 @@ public class TasksController : ControllerBase
     {
         await _deleteHandler.Handle(new DeleteTaskCommand(id), CancellationToken.None);
         return NoContent();
-    }
-
-    [HttpPatch("{id}/status")]
-    public async Task<ActionResult<TaskEntity>> MoveTask(int id, [FromBody] MoveTaskRequest request)
-    {
-        var command = new MoveTaskCommand(id, request.Status, request.Order);
-        var task = await _moveHandler.Handle(command, CancellationToken.None);
-        return Ok(task);
     }
 
     [HttpPost("bulk/delete")]
@@ -134,13 +124,9 @@ public record CreateTaskRequest(
 );
 
 public record UpdateTaskRequest(
-    string? Title,
+    string Title,
     string? Description,
-    DateTime? Date,
-    Domain.TaskStatus? Status
-);
-
-public record MoveTaskRequest(
+    DateTime Date,
     Domain.TaskStatus Status,
     int Order
 );

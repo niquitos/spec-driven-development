@@ -252,22 +252,6 @@
 
 ---
 
-## Phase 10: CLI & Observability (Constitution Requirements)
-
-**Purpose**: Constitution I. CLI-First, IV. Observability
-
-- [ ] T102 [P] Create `CreateTaskCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/CreateTaskCommand.cs`
-- [ ] T103 [P] Create `ListTasksCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/ListTasksCommand.cs`
-- [ ] T104 [P] Create `DeleteTaskCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/DeleteTaskCommand.cs`
-- [ ] T105 [P] Create `UpdateTaskCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/UpdateTaskCommand.cs`
-- [ ] T106 [P] Create `UpdateTaskStatusCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/UpdateTaskStatusCommand.cs`
-- [ ] T107 [P] Create `BulkDeleteCommand` CLI in `backend/src/TaskTracker.Cli/Commands/Tasks/BulkDeleteCommand.cs`
-- [ ] T108 Setup Serilog in `backend/src/TaskTracker.Api/Program.cs`
-- [ ] T109 Configure structured logging for CQRS handlers
-- [ ] T110 [P] Create CLI tests in `backend/tests/TaskTracker.Cli.Tests/`
-
----
-
 ## Phase 11: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements that affect multiple user stories
@@ -291,7 +275,6 @@
 - **User Stories (Phase 3-9)**: All depend on Foundational completion
   - Stories can run in parallel after Phase 2
   - Or sequentially in priority order (P1 → P2 → P3)
-- **CLI & Observability (Phase 10)**: Depends on any P1 story complete
 - **Polish (Phase 11)**: Depends on all desired user stories complete
 
 ### User Story Dependencies

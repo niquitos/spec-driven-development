@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import { Droppable } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
 import { CreateTaskModal } from './TaskModal/CreateTaskModal';
 import { Task, TaskStatus } from '../types/task';
@@ -14,31 +14,32 @@ interface ColumnProps {
 export function Column({ status, title, tasks }: ColumnProps) {
   const { selectedDate } = useTaskStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { setNodeRef, isOver } = useDroppable({
-    id: status,
-    data: { status },
-  });
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div
-      className={`column ${isOver ? 'column-drag-over' : ''}`}
-      data-status={status}
-      ref={setNodeRef}
-    >
+    <div className="column" data-status={status}>
       <div className="column-header">
         <h2>{title}</h2>
         <button onClick={openModal} aria-label={`Add task to ${title}`}>
           +
         </button>
       </div>
-      <div className="column-tasks">
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
-      </div>
+      <Droppable droppableId={String(status)}>
+        {(provided, snapshot) => (
+          <div
+            className={`column-tasks ${snapshot.isDraggingOver ? 'column-tasks-dragging-over' : ''}`}
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {tasks.map((task, index) => (
+              <TaskCard key={task.id} task={task} index={index} />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
       <CreateTaskModal
         isOpen={isModalOpen}
         onClose={closeModal}

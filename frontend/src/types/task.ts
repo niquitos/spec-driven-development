@@ -28,4 +28,5 @@ export interface UpdateTaskDto {
   description?: string;
   date?: string;
   status?: TaskStatus;
+  order?: number;
 }

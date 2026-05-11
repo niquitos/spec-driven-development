@@ -49,7 +49,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskE
         {
             Title = request.Title,
             Description = request.Description,
-            Date = request.Date,
+            Date = request.Date.ToUniversalTime(),
             Status = request.Status,
             Order = request.Order,
             CreatedAt = DateTime.UtcNow,

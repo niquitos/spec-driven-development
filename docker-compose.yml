@@ -40,6 +40,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: tasktracker-frontend
+    environment:
+      - VITE_API_URL=http://api:8080/api
     ports:
       - "3000:80"
     depends_on:

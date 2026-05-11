@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Task, CreateTaskDto, UpdateTaskDto, TaskStatus } from '../types/task';
+import { Task, CreateTaskDto, UpdateTaskDto } from '../types/task';
 
 const api = axios.create({
   baseURL: (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api',
@@ -23,11 +23,6 @@ export const taskApi = {
 
   async deleteTask(id: number): Promise<void> {
     await api.delete(`/tasks/${id}`);
-  },
-
-  async moveTask(id: number, status: TaskStatus, order: number): Promise<Task> {
-    const response = await api.patch<Task>(`/tasks/${id}/status`, { status, order });
-    return response.data;
   },
 
   async bulkDelete(taskIds: number[]): Promise<{ deleted: number }> {

@@ -38,7 +38,8 @@ public class UpdateTaskHandlerTests
             "New Title",
             "New Description",
             DateTime.Today,
-            Domain.TaskStatus.InProgress
+            Domain.TaskStatus.InProgress,
+            5
         );
 
         // Act
@@ -83,9 +84,10 @@ public class UpdateTaskHandlerTests
         var command = new UpdateTaskCommand(
             1,
             "Updated Title",
-            null, // Don't update description
-            null, // Don't update date
-            null  // Don't update status
+            "Original Description",
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0
         );
 
         // Act
@@ -107,7 +109,7 @@ public class UpdateTaskHandlerTests
             .ReturnsAsync((Domain.TaskEntity?)null);
 
         var handler = new UpdateTaskCommandHandler(mockRepository.Object);
-        var command = new UpdateTaskCommand(999, "Title", null, DateTime.Today, Domain.TaskStatus.New);
+        var command = new UpdateTaskCommand(999, "Title", null, DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => handler.Handle(command, CancellationToken.None));
@@ -142,7 +144,7 @@ public class UpdateTaskHandlerTests
             .ReturnsAsync(existingTask);
 
         var handler = new UpdateTaskCommandHandler(mockRepository.Object);
-        var command = new UpdateTaskCommand(1, "New Title", null, null, null);
+        var command = new UpdateTaskCommand(1, "New Title", null, DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
@@ -153,7 +155,7 @@ public class UpdateTaskHandlerTests
     }
 
     [Fact]
-    public async Task Handle_NullDescription_ClearsDescription()
+    public async Task Handle_ValidCommand_UpdatesOrder()
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
@@ -163,7 +165,7 @@ public class UpdateTaskHandlerTests
         {
             Id = 1,
             Title = "Title",
-            Description = "Existing Description",
+            Description = "Description",
             Date = DateTime.Today,
             Status = Domain.TaskStatus.New,
             Order = 0,
@@ -181,14 +183,14 @@ public class UpdateTaskHandlerTests
             .ReturnsAsync(existingTask);
 
         var handler = new UpdateTaskCommandHandler(mockRepository.Object);
-        var command = new UpdateTaskCommand(1, "Title", null, null, null);
+        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 10);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.NotNull(capturedTask);
-        Assert.Equal("Existing Description", capturedTask.Description);
+        Assert.Equal(10, capturedTask.Order);
     }
 
     [Fact]
@@ -220,7 +222,7 @@ public class UpdateTaskHandlerTests
             .ReturnsAsync(existingTask);
 
         var handler = new UpdateTaskCommandHandler(mockRepository.Object);
-        var command = new UpdateTaskCommand(1, "Title", "", null, null);
+        var command = new UpdateTaskCommand(1, "Title", "", DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act
         await handler.Handle(command, CancellationToken.None);

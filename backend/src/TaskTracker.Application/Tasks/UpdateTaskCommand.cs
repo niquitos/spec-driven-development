@@ -4,10 +4,11 @@ namespace TaskTracker.Application.Tasks;
 
 public record UpdateTaskCommand(
     int Id,
-    string? Title,
+    string Title,
     string? Description,
-    DateTime? Date,
-    Domain.TaskStatus? Status
+    DateTime Date,
+    Domain.TaskStatus Status,
+    int Order
 ) : IRequest<TaskEntity>;
 
 public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand, TaskEntity>
@@ -28,11 +29,11 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand, TaskE
             throw new KeyNotFoundException($"Task with id {request.Id} not found");
         }
 
-        if (request.Title != null) task.Title = request.Title;
-        if (request.Description != null) task.Description = request.Description;
-        if (request.Date.HasValue) task.Date = request.Date.Value;
-        if (request.Status.HasValue) task.Status = (Domain.TaskStatus)request.Status.Value;
-
+        task.Title = request.Title;
+        task.Description = request.Description;
+        task.Date = request.Date.ToUniversalTime();
+        task.Status = request.Status;
+        task.Order = request.Order;
         task.UpdatedAt = DateTime.UtcNow;
 
         return await _repository.UpdateAsync(task, cancellationToken);
