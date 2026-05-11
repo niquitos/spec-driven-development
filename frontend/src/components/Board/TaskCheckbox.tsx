@@ -17,7 +17,7 @@ export function TaskCheckbox({ taskId }: TaskCheckboxProps) {
       type="checkbox"
       checked={isSelected}
       onChange={handleChange}
-      aria-label={`Select task ${taskId}`}
+      aria-label={`Выбрать задачу ${taskId}`}
       className="task-checkbox"
       onClick={(e) => e.stopPropagation()}
     />

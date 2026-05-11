@@ -43,7 +43,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
       setIsCreateModalOpen(false);
       onClose();
     } catch (err) {
-      setError('Failed to create task. Please try again.');
+      setError('Не удалось создать задачу. Попробуйте снова.');
     } finally {
       setIsSubmitting(false);
     }

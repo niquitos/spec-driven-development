@@ -44,10 +44,10 @@ export function TaskCard({ task, index }: TaskCardProps) {
             <div className="task-card-header">
               <TaskCheckbox taskId={task.id} />
               <div className="task-card-actions">
-                <button onClick={handleEdit} aria-label={`Edit task ${task.title}`}>
+                <button onClick={handleEdit} aria-label={`Редактировать задачу "${task.title}"`}>
                   ✏️
                 </button>
-                <button onClick={handleDelete} aria-label={`Delete task ${task.title}`}>
+                <button onClick={handleDelete} aria-label={`Удалить задачу "${task.title}"`}>
                   🗑️
                 </button>
               </div>

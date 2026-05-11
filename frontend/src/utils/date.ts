@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 export function formatDate(date: Date, formatStr: string = 'yyyy-MM-dd'): string {
-  return format(date, formatStr);
+  return format(date, formatStr, { locale: ru });
 }
 
 export function parseDate(dateString: string): Date {

@@ -11,7 +11,7 @@ export function BulkActionsPanel() {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Delete ${selectedTaskIds.length} selected tasks?`)) {
+    if (window.confirm(`Удалить ${selectedTaskIds.length} выбранных задач?`)) {
       await bulkDelete();
     }
   };
@@ -27,9 +27,9 @@ export function BulkActionsPanel() {
   };
 
   return (
-    <div className="bulk-actions-panel" role="region" aria-label="Bulk actions">
+    <div className="bulk-actions-panel" role="region" aria-label="Массовые операции">
       <div className="bulk-actions-info">
-        <span>{selectedTaskIds.length} selected</span>
+        <span>Выбрано: {selectedTaskIds.length}</span>
       </div>
 
       <div className="bulk-actions-controls">
@@ -38,49 +38,49 @@ export function BulkActionsPanel() {
             <button
               onClick={handleBulkDelete}
               className="btn btn-danger"
-              aria-label={`Delete ${selectedTaskIds.length} selected tasks`}
+              aria-label={`Удалить ${selectedTaskIds.length} выбранных задач`}
             >
-              Delete ({selectedTaskIds.length})
+              Удалить ({selectedTaskIds.length})
             </button>
             <button
               onClick={() => setShowMoveForm(true)}
               className="btn btn-primary"
-              aria-label={`Move ${selectedTaskIds.length} selected tasks to another date`}
+              aria-label={`Переместить ${selectedTaskIds.length} выбранных задач на другую дату`}
             >
-              Move ({selectedTaskIds.length})
+              Переместить ({selectedTaskIds.length})
             </button>
             <button
               onClick={handleCancel}
               className="btn btn-secondary"
-              aria-label="Cancel selection"
+              aria-label="Отменить выбор"
             >
-              Cancel
+              Отмена
             </button>
           </>
         ) : (
           <>
             <div className="move-form">
-              <label htmlFor="move-date">Target Date:</label>
+              <label htmlFor="move-date">Целевая дата:</label>
               <input
                 id="move-date"
                 type="date"
                 value={moveDate}
                 onChange={(e) => setMoveDate(e.target.value)}
-                aria-label="Select target date for bulk move"
+                aria-label="Выбрать целевую дату для перемещения"
               />
               <button
                 onClick={handleBulkMove}
                 className="btn btn-success"
-                aria-label={`Move ${selectedTaskIds.length} tasks to ${moveDate}`}
+                aria-label={`Переместить ${selectedTaskIds.length} задач на ${moveDate}`}
               >
-                Confirm Move
+                Подтвердить
               </button>
               <button
                 onClick={() => setShowMoveForm(false)}
                 className="btn btn-secondary"
-                aria-label="Cancel move operation"
+                aria-label="Отменить перемещение"
               >
-                Cancel
+                Отмена
               </button>
             </div>
           </>

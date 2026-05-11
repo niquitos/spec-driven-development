@@ -14,11 +14,11 @@ const columns: { status: TaskStatus; title: string }[] = [
 export function Board() {
   const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask, isLoading, error } = useTaskStore();
 
-  // Загружаем задачи только один раз при маунте
+  // Загружаем задачи при изменении даты
   useEffect(() => {
     loadTasks(selectedDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedDate]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) {

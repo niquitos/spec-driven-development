@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Task, CreateTaskDto, UpdateTaskDto } from '../types/task';
 
 const api = axios.create({
-  baseURL: (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: '/api',
 });
 
 export const taskApi = {

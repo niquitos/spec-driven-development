@@ -22,7 +22,7 @@ export function Column({ status, title, tasks }: ColumnProps) {
     <div className="column" data-status={status}>
       <div className="column-header">
         <h2>{title}</h2>
-        <button onClick={openModal} aria-label={`Add task to ${title}`}>
+        <button onClick={openModal} aria-label={`Добавить задачу в колонку "${title}"`}>
           +
         </button>
       </div>

@@ -14,16 +14,36 @@
 
 ## Быстрый старт
 
-### Через Docker Compose (рекомендуется)
+### Запуск из Docker Hub (рекомендуется)
+
+Образы публикуются в Docker Hub: [`niquitos1985`](https://hub.docker.com/r/niquitos1985)
 
 ```bash
-docker-compose up --build
+# Windows (PowerShell)
+.\docker-start.ps1
+
+# Linux/Mac
+./docker-start.sh
 ```
 
 После запуска:
 - Frontend: http://localhost:3000
 - API: http://localhost:5000
 - Swagger: http://localhost:5000/swagger
+
+### Сборка и публикация образов
+
+```bash
+# Сборка образов (Windows)
+.\docker-build.ps1
+
+# Сборка образов (Linux/Mac)
+./docker-build.sh
+
+# Публикация в Docker Hub (требуется авторизация)
+docker login
+.\docker-push.ps1  # или ./docker-push.sh
+```
 
 ### Локальная разработка
 

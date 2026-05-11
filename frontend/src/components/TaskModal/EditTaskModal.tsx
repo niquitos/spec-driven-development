@@ -46,7 +46,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
       await updateTask(task.id, updates);
       onClose();
     } catch (err) {
-      setError('Failed to update task. Please try again.');
+      setError('Не удалось обновить задачу. Попробуйте снова.');
     } finally {
       setIsSubmitting(false);
     }

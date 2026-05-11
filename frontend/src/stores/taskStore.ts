@@ -36,7 +36,7 @@ interface TaskState {
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
   updateTask: (id: number, updates: UpdateTaskDto) => Promise<void>;
-  deleteTask: (id: number) => void;
+  deleteTask: (id: number) => Promise<void>;
   setSelectedDate: (date: Date) => void;
   toggleTaskSelection: (id: number) => void;
   clearSelection: () => void;
@@ -146,10 +146,15 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   setEditingTask: (task) => set({ editingTask: task }),
 
-  deleteTask: (id) => set((state) => ({
-    tasks: state.tasks.filter((task) => task.id !== id),
-    selectedTaskIds: state.selectedTaskIds.filter((taskId) => taskId !== id),
-  })),
+  deleteTask: async (id) => {
+    // Optimistic update
+    set((state) => ({
+      tasks: state.tasks.filter((task) => task.id !== id),
+      selectedTaskIds: state.selectedTaskIds.filter((taskId) => taskId !== id),
+    }));
+    // Send request to backend
+    await taskApi.deleteTask(id);
+  },
 
   setSelectedDate: (date) => {
     updateUrlDate(date);
