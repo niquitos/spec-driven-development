@@ -2,19 +2,31 @@
 
 **Feature**: 001-kanban-calendar  
 **Date**: 2026-05-09  
-**Executable**: `tasktracker`
+**Last Updated**: 2026-05-11  
+**Status**: Deprecated
 
 ---
 
 ## Overview
 
-CLI предоставляет доступ к основным операциям для скриптов и администрирования (Constitution I. CLI-First).
+**CLI удалён из проекта.** 
+
+Решение об удалении CLI принято потому, что:
+- Веб-интерфейс является основным и единственным UX приложения
+- Все операции доступны через интерактивный UI
+- Single-user система не требует скриптовой автоматизации
+
+Вместо CLI используйте:
+- **Веб-интерфейс**: http://localhost:3000
+- **API endpoints**: См. [api.md](api.md)
 
 ---
 
-## Commands
+## Historical Reference
 
-### `tasktracker tasks list`
+Ниже приведена историческая документация CLI, которая была удалена. Эта информация сохраняется только для справки.
+
+~~~
 
 Получить задачи на дату.
 
@@ -302,3 +314,5 @@ tasktracker --config ./appsettings.json tasks list --date 2026-05-09
 |----------|-------------|
 | `TASKTRACKER_API_URL` | URL API (default: `http://localhost:5000`) |
 | `TASKTRACKER_CONFIG` | Путь к конфигурации |
+
+~~~

@@ -2,7 +2,9 @@
 
 **Feature**: 001-kanban-calendar  
 **Date**: 2026-05-09  
-**Purpose**: Resolve all NEEDS CLARIFICATION from Technical Context
+**Last Updated**: 2026-05-11  
+**Purpose**: Resolve all NEEDS CLARIFICATION from Technical Context  
+**Status**: Implemented
 
 ---
 
@@ -143,41 +145,44 @@ public class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Guid>
 
 ## R003: React DnD библиотеки для drag-n-drop
 
-**Decision**: `@dnd-kit/core` + `@dnd-kit/sortable`
+**Decision**: `@hello-pangea/dnd`
 
 **Rationale**:
-- Современная альтернатива react-dnd
-- Лучшая поддержка TypeScript
-- Меньший bundle size (~15kb vs ~50kb)
-- Встроенная поддержка accessibility
+- Fork react-beautiful-dnd с поддержкой React 18
+- Лучшая совместимость с канбан-досками
+- Встроенная поддержка вертикального и горизонтального drag-n-drop
+- Простой API для колонок
 
 **Alternatives Considered**:
-- react-dnd — зрелая, но тяжелее
-- react-beautiful-dnd — только для вертикальных списков
+- @dnd-kit/core — более сложный API
+- react-dnd — избыточен для простых сценариев
 
-**Implementation Sample**:
+**Implementation** (реализовано):
 ```tsx
-// components/Board/Board.tsx
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
+// components/Board.tsx
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 
-export function Board({ tasks }) {
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-    
-    // Перемещение между колонками
-    if (active.data.current?.columnId !== over.id) {
-      updateTaskStatus(active.id, over.id as TaskStatus);
-    }
+export function Board() {
+  const { moveTask } = useTaskStore();
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const taskId = Number(result.draggableId);
+    const newStatus = Number(result.destination.droppableId) as TaskStatus;
+    const newOrder = result.destination.index;
+
+    moveTask(taskId, newStatus, newOrder);
   };
-  
+
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <Column id="new" tasks={tasks.filter(t => t.status === 'new')} />
-      <Column id="inprogress" tasks={tasks.filter(t => t.status === 'inprogress')} />
-      <Column id="done" tasks={tasks.filter(t => t.status === 'done')} />
-    </DndContext>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="board">
+        {columns.map((column) => (
+          <Column key={column.status} status={column.status} tasks={...} />
+        ))}
+      </div>
+    </DragDropContext>
   );
 }
 ```
@@ -293,12 +298,21 @@ Host=localhost;Port=5432;Database=tasktracker;Username=postgres;Password=postgre
 
 ## Summary
 
-| Research Task | Decision |
-|---------------|----------|
-| R001: IValidator | Кастомный интерфейс с ValidationResult |
-| R002: CQRS | IRequest<T>/IRequestHandler<T,R> без MediatR |
-| R003: Drag-n-Drop | @dnd-kit/core + @dnd-kit/sortable |
-| R004: API Contracts | RESTful endpoints с JSON schemas |
-| R005: EF Core + Postgres | Npgsql с retry policy |
+| Research Task | Decision | Implemented |
+|---------------|----------|-------------|
+| R001: IValidator | Кастомный интерфейс с ValidationResult | ✅ |
+| R002: CQRS | IRequest<T>/IRequestHandler<T,R> без MediatR | ✅ |
+| R003: Drag-n-Drop | @hello-pangea/dnd | ✅ |
+| R004: API Contracts | RESTful endpoints с JSON schemas | ✅ |
+| R005: EF Core + Postgres | Npgsql с миграциями | ✅ |
 
-**All NEEDS CLARIFICATION resolved. Ready for Phase 1.**
+## Implementation Notes
+
+**Финальные решения:**
+- **ID задачи**: INT IDENTITY вместо GUID (упрощение, производительность)
+- **Drag-n-Drop**: @hello-pangea/dnd вместо @dnd-kit (лучше для канбан-досок)
+- **State Management**: Zustand вместо Redux (меньше boilerplate)
+- **CLI**: Удалён — веб-интерфейс является основным UX
+- **Tests**: TDD требуется, но тесты пока не написаны
+
+**All NEEDS CLARIFICATION resolved. Implementation complete.**

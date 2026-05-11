@@ -2,7 +2,9 @@
 
 **Feature**: 001-kanban-calendar  
 **Date**: 2026-05-09  
+**Last Updated**: 2026-05-11  
 **Base URL**: `/api`
+**Status**: Implemented
 
 ---
 
@@ -17,21 +19,21 @@
 
 **Response 200**:
 ```json
-{
-  "date": "2026-05-09",
-  "tasks": [
-    {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "title": "Купить продукты",
-      "description": "Молоко, хлеб, яйца",
-      "status": "new",
-      "date": "2026-05-09",
-      "order": 0,
-      "createdAt": "2026-05-09T10:00:00Z"
-    }
-  ]
-}
+[
+  {
+    "id": 1,
+    "title": "Купить продукты",
+    "description": "Молоко, хлеб, яйца",
+    "status": 0,
+    "date": "2026-05-09",
+    "order": 0,
+    "createdAt": "2026-05-09T10:00:00Z",
+    "updatedAt": null
+  }
+]
 ```
+
+**Note**: `id` — integer (INT IDENTITY), `status` — integer enum (0=new, 1=inprogress, 2=done)
 
 **Response 400** (неверный формат даты):
 ```json
@@ -61,13 +63,14 @@
 **Response 201**:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": 1,
   "title": "Купить продукты",
   "description": "Молоко, хлеб, яйца",
-  "status": "new",
+  "status": 0,
   "date": "2026-05-09",
   "order": 0,
-  "createdAt": "2026-05-09T10:00:00Z"
+  "createdAt": "2026-05-09T10:00:00Z",
+  "updatedAt": null
 }
 ```
 
@@ -93,22 +96,20 @@
 **Response 200**:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": 1,
   "title": "Купить продукты",
   "description": "Молоко, хлеб, яйца",
-  "status": "new",
+  "status": 0,
   "date": "2026-05-09",
   "order": 0,
-  "createdAt": "2026-05-09T10:00:00Z"
+  "createdAt": "2026-05-09T10:00:00Z",
+  "updatedAt": null
 }
 ```
 
-**Response 404**:
-```json
-{
-  "error": "Task not found"
-}
-```
+**Response 404**: `404 Not Found` (empty response)
+
+**Implementation Note**: API возвращает `404 Not Found` без тела ответа при отсутствии задачи.
 
 ---
 
@@ -126,26 +127,11 @@
 }
 ```
 
-**Response 200**:
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Купить продукты и товары для дома",
-  "description": "Молоко, хлеб, яйца, шампунь",
-  "status": "inprogress",
-  "date": "2026-05-10",
-  "order": 0,
-  "createdAt": "2026-05-09T10:00:00Z",
-  "updatedAt": "2026-05-09T12:00:00Z"
-}
-```
+**Response**: `204 No Content`
 
-**Response 404**:
-```json
-{
-  "error": "Task not found"
-}
-```
+**Response 404**: `404 Not Found`
+
+**Implementation Note**: API возвращает `204 No Content` при успешном обновлении.
 
 ---
 
@@ -153,62 +139,17 @@
 
 Удалить задачу.
 
-**Response 204**: No content
+**Response**: `204 No Content`
 
-**Response 404**:
-```json
-{
-  "error": "Task not found"
-}
-```
+**Response 404**: `404 Not Found`
 
 ---
 
-### PATCH /tasks/{id}/status
+## Implementation Notes
 
-Изменить статус задачи (drag-n-drop между колонками).
+**Drag-n-Drop**: Изменение статуса задачи при drag-n-drop реализовано через `PUT /tasks/{id}` с передачей полного объекта задачи, включая новый `status` и `order`.
 
-**Request Body**:
-```json
-{
-  "status": "inprogress"
-}
-```
-
-**Response 200**:
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Купить продукты",
-  "status": "inprogress",
-  "order": 1
-}
-```
-
----
-
-### PUT /tasks/reorder
-
-Изменить порядок задач в колонке.
-
-**Request Body**:
-```json
-{
-  "date": "2026-05-09",
-  "status": "new",
-  "taskIds": ["uuid-1", "uuid-2", "uuid-3"]
-}
-```
-
-**Response 200**:
-```json
-{
-  "success": true,
-  "updated": 3
-}
-```
-
----
+**Reorder**: Перетаскивание задач внутри колонки также использует `PUT /tasks/{id}` — порядок обновляется на бекенде автоматически при изменении `order`.
 
 ## Bulk Operations
 
@@ -219,14 +160,14 @@
 **Request Body**:
 ```json
 {
-  "taskIds": ["uuid-1", "uuid-2", "uuid-3"]
+  "taskIds": [1, 2, 3]
 }
 ```
 
 **Response 200**:
 ```json
 {
-  "deleted": 3
+  "deletedCount": 3
 }
 ```
 
@@ -239,7 +180,7 @@
 **Request Body**:
 ```json
 {
-  "taskIds": ["uuid-1", "uuid-2", "uuid-3"],
+  "taskIds": [1, 2, 3],
   "targetDate": "2026-05-10"
 }
 ```
@@ -247,7 +188,7 @@
 **Response 200**:
 ```json
 {
-  "moved": 3,
+  "movedCount": 3,
   "targetDate": "2026-05-10"
 }
 ```
@@ -283,8 +224,10 @@
 
 ## Status Values
 
-| Value | Description |
-|-------|-------------|
-| `new` | Новые |
-| `inprogress` | В процессе |
-| `done` | Сделаны |
+| Integer | Enum | Description |
+|---------|------|-------------|
+| 0 | `New` | Новые |
+| 1 | `InProgress` | В процессе |
+| 2 | `Done` | Сделаны |
+
+**Note**: API возвращает статус как integer enum value (0, 1, 2).

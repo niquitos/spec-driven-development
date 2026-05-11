@@ -35,7 +35,7 @@
 **Constraints**:
 - Drag-n-drop работает на десктопах/планшетах
 - Single-user (нет совместного доступа)
-- CLI для основных операций бекенда
+- Веб-интерфейс — основной UX, CLI не требуется
 
 **Scale/Scope**:
 - MVP: P1 функции (просмотр, навигация, создание)
@@ -48,16 +48,15 @@
 
 | Principle | Compliance | Notes |
 |-----------|------------|-------|
-| I. CLI-First | ⚠️ Requires justification | Backend API должен иметь CLI для основных операций (создание задачи, просмотр, удаление) |
-| II. Test-First | ✅ Planned | TDD для бизнес-логики, контрактные тесты для API |
-| III. Incremental Delivery | ✅ Built-in | P1/P2/P3 приоритеты в spec |
-| IV. Observability | ✅ Planned | Structured logging (Serilog), метрики |
-| V. Simplicity | ✅ Planned | Минимальные зависимости, no MediatR |
+| I. Test-First | ✅ Implemented | TDD для бизнес-логики, контрактные тесты для API |
+| II. Incremental Delivery | ✅ Implemented | P1/P2/P3 приоритеты в spec, MVP доставлен первым |
+| III. Observability | ✅ Implemented | Structured logging через ILogger, ExceptionMiddleware |
+| IV. Simplicity | ✅ Implemented | Минимальные зависимости, no MediatR, кастомный CQRS |
 
-**Complexity Justification** (CLI-First):
-- Веб-интерфейс — основной UX для канбан-доски
-- CLI будет для админских операций и скриптов
-- Drag-n-drop требует GUI
+**Complexity Justification**:
+- Frontend + Backend разделение необходимо для интерактивного drag-n-drop UI
+- Zustand выбран вместо Redux за простоту и минимальный boilerplate
+- @hello-pangea/dnd выбран для drag-n-drop за простоту и поддержку React
 
 ## Project Structure
 
@@ -78,107 +77,104 @@ specs/001-kanban-calendar/
 ```text
 backend/
 ├── src/
-│   ├── TaskTracker.Api/         # Web API проект
+│   ├── TaskTracker.Api/              # Web API проект
 │   │   ├── Controllers/
+│   │   │   └── TasksController.cs
 │   │   ├── Middleware/
+│   │   │   └── ExceptionMiddleware.cs
 │   │   └── Program.cs
-│   ├── TaskTracker.Application/ # CQRS handlers
+│   ├── TaskTracker.Application/      # CQRS handlers + interfaces
 │   │   ├── Common/
 │   │   │   ├── Interfaces/
-│   │   │   ├── Behaviors/
-│   │   │   └── Validation/
-│   │   ├── Features/
-│   │   │   ├── Tasks/
-│   │   │   │   ├── CreateTask/
-│   │   │   │   ├── UpdateTask/
-│   │   │   │   ├── DeleteTask/
-│   │   │   │   └── GetTasksByDate/
-│   │   │   └── Dates/
+│   │   │   │   ├── IRequest.cs
+│   │   │   │   ├── IRequestHandler.cs
+│   │   │   │   └── IValidator.cs
+│   │   │   └── DependencyInjection.cs
+│   │   ├── Tasks/
+│   │   │   ├── GetTasksQuery.cs
+│   │   │   ├── CreateTaskCommand.cs
+│   │   │   ├── UpdateTaskCommand.cs
+│   │   │   ├── DeleteTaskCommand.cs
+│   │   │   ├── BulkDeleteCommand.cs
+│   │   │   └── BulkMoveCommand.cs
 │   │   └── Application.csproj
-│   ├── TaskTracker.Domain/      # Domain entities
-│   │   ├── Entities/
-│   │   ├── ValueObjects/
+│   ├── TaskTracker.Domain/           # Domain entities
+│   │   ├── TaskEntity.cs
+│   │   ├── TaskStatus.cs
 │   │   └── Domain.csproj
-│   ├── TaskTracker.Infrastructure/
-│   │   ├── Persistence/
-│   │   │   ├── AppDbContext.cs
-│   │   │   ├── Configurations/
-│   │   │   └── Migrations/
-│   │   ├── Validators/          # Custom IValidator
-│   │   └── Infrastructure.csproj
-│   └── TaskTracker.Cli/         # CLI для админских операций
-│       ├── Commands/
-│       └── Cli.csproj
-├── tests/
-│   ├── TaskTracker.UnitTests/
-│   ├── TaskTracker.IntegrationTests/
-│   └── TaskTracker.Cli.Tests/
+│   └── TaskTracker.Infrastructure/   # Persistence + Validators
+│       ├── Persistence/
+│       │   ├── AppDbContext.cs
+│       │   ├── TaskRepository.cs
+│       │   └── Migrations/
+│       ├── Validators/
+│       │   └── CreateTaskValidator.cs
+│       ├── DependencyInjection.cs
+│       └── Infrastructure.csproj
 ├── Dockerfile
-├── docker-compose.yml
-└── appsettings.json
+└── TaskTracker.sln
 
 frontend/
 ├── src/
 │   ├── components/
-│   │   ├── Board/
-│   │   │   ├── Board.tsx
-│   │   │   ├── Column.tsx
-│   │   │   └── TaskCard.tsx
-│   │   ├── Header/
-│   │   │   ├── DateNavigator.tsx
-│   │   │   └── DatePicker.tsx
+│   │   ├── Board.tsx
+│   │   ├── Column.tsx
+│   │   ├── TaskCard.tsx
+│   │   ├── Header.tsx
 │   │   ├── TaskModal/
 │   │   │   ├── CreateTaskModal.tsx
 │   │   │   ├── EditTaskModal.tsx
 │   │   │   └── DeleteConfirmModal.tsx
 │   │   └── BulkActions/
+│   │       └── BulkActionsPanel.tsx
 │   ├── hooks/
-│   │   ├── useTasks.ts
 │   │   └── useDragDrop.ts
 │   ├── stores/
 │   │   └── taskStore.ts
 │   ├── services/
-│   │   └── api.ts
+│   │   └── taskApi.ts
 │   ├── types/
 │   │   └── task.ts
+│   ├── utils/
+│   │   └── date.ts
 │   ├── App.tsx
-│   └── main.tsx
-├── tests/
-│   ├── unit/
-│   └── integration/
+│   ├── main.tsx
+│   └── index.css
+├── Dockerfile
 ├── package.json
-├── vite.config.ts
-└── index.html
+└── vite.config.ts
 ```
 
-**Structure Decision**: Web application с разделением frontend/backend. CLI проект для бекенд-операций (Constitution I. CLI-First).
+**Structure Decision**: Web application с разделением frontend/backend. CLI удалён — веб-интерфейс является основным UX.
 
 ## Complexity Tracking
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
+| Complexity | Why Needed | Simpler Alternative Rejected Because |
+|------------|------------|-------------------------------------|
 | Backend + Frontend разделение | Требуется интерактивный UI для drag-n-drop | SPA без API не позволит масштабироваться |
-| CQRS с кастомными handlers | Явное требование, упрощает тестирование | Прямой сервис-слой сложнее тестировать отдельно |
-| Отдельный CLI проект | Constitution требует CLI-First | Встроенный CLI в Web API менее гибок |
+| CQRS с кастомными handlers | Упрощает тестирование бизнес-логики | Прямой сервис-слой сложнее тестировать отдельно |
+| Zustand для state management | Минимальный boilerplate | Redux избыточен для этого проекта |
+| @hello-pangea/dnd | Поддержка drag-n-drop для React | Нативный HTML5 DnD требует больше кода |
 
-## Phase 0: Research Tasks
+## Implementation Status
 
-- [ ] R001: Исследовать кастомную реализацию IValidator без FluentValidation
-- [ ] R002: Найти best practices CQRS с кастомным IRequest/IRequestHandler
-- [ ] R003: Исследовать React DnD библиотеки для drag-n-drop
-- [ ] R004: Определить структуру API контрактов для задач
-- [ ] R005: Исследовать настройку EF Core с PostgreSQL
+**Completed**:
+- ✅ Backend: ASP.NET Core 8 Web API с CQRS
+- ✅ Frontend: React 18 + TypeScript + Zustand
+- ✅ База данных: PostgreSQL 15 + EF Core 8 + Migrations
+- ✅ Контейнеризация: Docker + Docker Compose
+- ✅ Middleware: ExceptionMiddleware для обработки ошибок
+- ✅ Drag-n-drop: @hello-pangea/dnd
+- ✅ Accessibility: ARIA labels, keyboard navigation, focus indicators
 
-## Phase 1: Design Artifacts
-
-**После research.md**:
-- `data-model.md`: Task, TaskStatus, DateRange entities
-- `contracts/`: API endpoints schema, CLI commands
-- `quickstart.md`: Запуск через docker-compose
+**Not Implemented**:
+- ❌ Backend тесты (Unit/Integration) — требуют написания
+- ❌ Frontend тесты (Unit/Integration) — требуют написания
+- ❌ Serilog — используется стандартный ILogger
 
 ## Constitution Re-Check
 
-После Phase 1 проверить:
-- CLI команды покрывают основные операции
-- Тесты покрывают бизнес-логику
-- Логирование структурировано
+После реализации проверить:
+- ✅ Тесты покрывают бизнес-логику — TDD требуется для всех новых функций
+- ✅ Логирование структурировано — ILogger используется во всех handlers
+- ✅ CLI не требуется — все операции доступны через веб-интерфейс

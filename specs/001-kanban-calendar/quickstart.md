@@ -2,6 +2,8 @@
 
 **Feature**: 001-kanban-calendar  
 **Date**: 2026-05-09  
+**Last Updated**: 2026-05-11  
+**Status**: Implemented  
 
 ---
 
@@ -133,19 +135,18 @@ npm run test:e2e
 
 ---
 
-## CLI Usage
+## API Testing
 
 ```bash
-cd backend
-
-# Запустить CLI
-dotnet run --project src/TaskTracker.Cli -- tasks list --date 2026-05-09
+# Получить задачи на дату
+curl http://localhost:5000/api/tasks?date=2026-05-09
 
 # Создать задачу
-dotnet run --project src/TaskTracker.Cli -- tasks create --title "Test" --date 2026-05-09
+curl -X POST http://localhost:5000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test","date":"2026-05-09","status":0,"order":0}'
 
-# Удалить задачу
-dotnet run --project src/TaskTracker.Cli -- tasks delete --id <guid>
+# Swagger UI доступен на http://localhost:5000/swagger
 ```
 
 ---

@@ -2,7 +2,9 @@
 
 **Feature**: 001-kanban-calendar  
 **Date**: 2026-05-09  
+**Last Updated**: 2026-05-11  
 **Source**: [spec.md](spec.md), [research.md](research.md)
+**Status**: Implemented
 
 ---
 
@@ -15,7 +17,7 @@
 ```csharp
 public class TaskEntity
 {
-    public Guid Id { get; set; }           // Primary key
+    public int Id { get; set; }            // Primary key (IDENTITY)
     public string Title { get; set; }      // NVARCHAR(200), NOT NULL
     public string? Description { get; set; } // NVARCHAR(MAX), NULL
     public TaskStatus Status { get; set; } // INT, NOT NULL (0=new, 1=inprogress, 2=done)
@@ -27,7 +29,7 @@ public class TaskEntity
 ```
 
 **Fields**:
-- `Id`: Уникальный идентификатор (GUID)
+- `Id`: Уникальный идентификатор (INT IDENTITY — автоинкремент)
 - `Title`: Название задачи (1-200 символов)
 - `Description`: Описание (опционально)
 - `Status`: Статус задачи
@@ -77,18 +79,15 @@ public readonly record struct DateRange
 ## Database Schema
 
 ```sql
--- Schema: tasks
-CREATE SCHEMA tasks;
-
--- Table: Tasks
-CREATE TABLE tasks.Tasks (
-    Id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+-- Table: Tasks (EF Core использует dbo по умолчанию)
+CREATE TABLE Tasks (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
     Title NVARCHAR(200) NOT NULL,
     Description NVARCHAR(MAX) NULL,
     Status INT NOT NULL CONSTRAINT DF_Tasks_Status DEFAULT 0,
     [Date] DATE NOT NULL,
     [Order] INT NOT NULL,
-    CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_Tasks_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_Tasks_CreatedAt DEFAULT GETUTCDATE(),
     UpdatedAt DATETIME2 NULL,
     
     INDEX IX_Tasks_Date_Status_Order ([Date], Status, [Order])
@@ -98,18 +97,20 @@ CREATE TABLE tasks.Tasks (
 **Indexes**:
 - `IX_Tasks_Date_Status_Order`: Composite index для быстрого поиска задач на дату с сортировкой
 
+**Implementation Note**: В реализованной версии используется `INT IDENTITY` вместо `GUID` для упрощения и лучшей производительности при индексации.
+
 ---
 
 ## EF Core Configuration
 
+**Implementation Note**: В реализованной версии конфигурация упрощена — используется конвенция по умолчанию без явной конфигурации через `IEntityTypeConfiguration`.
+
 ```csharp
-// Infrastructure/Persistence/Configurations/TaskEntityConfiguration.cs
-public class TaskEntityConfiguration : IEntityTypeConfiguration<TaskEntity>
+// Infrastructure/Persistence/AppDbContext.cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
-    public void Configure(EntityTypeBuilder<TaskEntity> builder)
+    modelBuilder.Entity<TaskEntity>(builder =>
     {
-        builder.ToTable("Tasks", "tasks");
-        
         builder.HasKey(t => t.Id);
         
         builder.Property(t => t.Title)
@@ -127,14 +128,8 @@ public class TaskEntityConfiguration : IEntityTypeConfiguration<TaskEntity>
             .HasColumnType("date")
             .IsRequired();
         
-        builder.Property(t => t.Order)
-            .IsRequired();
-        
-        builder.Property(t => t.CreatedAt)
-            .HasDefaultValueSql("SYSUTCDATETIME()");
-        
         builder.HasIndex(t => new { t.Date, t.Status, t.Order });
-    }
+    });
 }
 ```
 
@@ -164,23 +159,22 @@ Task Lifecycle:
 
 ## Query Models
 
-### TasksByDateResult
+В реализованной версии используется прямое возвращение `TaskEntity` без дополнительных DTO.
+
+### API Response Model
 
 ```csharp
-public record TasksByDateResult(
-    DateTime Date,
-    IReadOnlyList<TaskDto> Tasks
-);
-
-public record TaskDto(
-    Guid Id,
-    string Title,
-    string? Description,
-    TaskStatus Status,
-    DateTime Date,
-    int Order,
-    DateTime CreatedAt
-);
+// Frontend type (TypeScript)
+export interface Task {
+  id: number;              // INT из БД
+  title: string;
+  description: string | null;
+  status: TaskStatus;      // Enum: 0=new, 1=inprogress, 2=done
+  date: string;            // ISO date string
+  order: number;
+  createdAt: string;       // ISO datetime string
+  updatedAt: string;       // ISO datetime string
+}
 ```
 
 ---
