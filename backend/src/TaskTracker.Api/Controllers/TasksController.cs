@@ -11,7 +11,7 @@ public class TasksController : ControllerBase
 {
     private readonly IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> _getTasksHandler;
     private readonly IRequestHandler<CreateTaskCommand, TaskEntity> _createHandler;
-    private readonly IRequestHandler<UpdateTaskCommand, TaskEntity> _updateHandler;
+    private readonly IRequestHandler<UpdateTaskCommand> _updateHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
@@ -20,7 +20,7 @@ public class TasksController : ControllerBase
     public TasksController(
         IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> getTasksHandler,
         IRequestHandler<CreateTaskCommand, TaskEntity> createHandler,
-        IRequestHandler<UpdateTaskCommand, TaskEntity> updateHandler,
+        IRequestHandler<UpdateTaskCommand> updateHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
@@ -76,7 +76,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<TaskEntity>> UpdateTask(int id, [FromBody] UpdateTaskRequest request)
+    public async Task<IActionResult> UpdateTask(int id, [FromBody] UpdateTaskRequest request)
     {
         var command = new UpdateTaskCommand(
             id,
@@ -87,8 +87,8 @@ public class TasksController : ControllerBase
             request.Order
         );
 
-        var task = await _updateHandler.Handle(command, CancellationToken.None);
-        return Ok(task);
+        await _updateHandler.Handle(command, CancellationToken.None);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]

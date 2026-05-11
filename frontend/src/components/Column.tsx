@@ -12,7 +12,7 @@ interface ColumnProps {
 }
 
 export function Column({ status, title, tasks }: ColumnProps) {
-  const { selectedDate } = useTaskStore();
+  const { selectedDate, isLoading } = useTaskStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
@@ -33,9 +33,17 @@ export function Column({ status, title, tasks }: ColumnProps) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
-            ))}
+            {isLoading ? (
+              <div className="column-loading">
+                <div className="loading-skeleton"></div>
+                <div className="loading-skeleton"></div>
+                <div className="loading-skeleton"></div>
+              </div>
+            ) : (
+              tasks.map((task, index) => (
+                <TaskCard key={task.id} task={task} index={index} />
+              ))
+            )}
             {provided.placeholder}
           </div>
         )}

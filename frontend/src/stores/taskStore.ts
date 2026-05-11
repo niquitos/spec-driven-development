@@ -75,12 +75,73 @@ export const useTaskStore = create<TaskState>((set) => ({
   addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
 
   updateTask: async (id, updates) => {
-    await taskApi.updateTask(id, updates);
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id ? { ...task, ...updates, updatedAt: new Date().toISOString() } : task
-      ),
-    }));
+    const state = useTaskStore.getState();
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const dateStr = state.selectedDate.toISOString().split('T')[0];
+    const oldStatus = task.status;
+    const newStatus = updates.status ?? oldStatus;
+    const isStatusChanged = oldStatus !== newStatus;
+
+    // Если статус изменился - пересчитываем порядок в обеих колонках
+    if (isStatusChanged) {
+      const dateTasks = state.tasks.filter(t =>
+        new Date(t.date).toDateString() === new Date(dateStr).toDateString()
+      );
+
+      // Задачи старой колонки (без перемещаемой)
+      const oldColumnTasks = dateTasks.filter(t => t.status === oldStatus && t.id !== id)
+        .sort((a, b) => a.order - b.order);
+
+      // Задачи новой колонки (без перемещаемой)
+      const newColumnTasks = dateTasks.filter(t => t.status === newStatus && t.id !== id)
+        .sort((a, b) => a.order - b.order);
+
+      // Вставляем задачу в конец новой колонки
+      newColumnTasks.push(task);
+
+      // Обновляем order для всех задач обеих колонок
+      const updatedTasks = new Map<number, Task>();
+      oldColumnTasks.forEach((t, i) => {
+        updatedTasks.set(t.id, { ...t, order: i, updatedAt: new Date().toISOString() });
+      });
+      newColumnTasks.forEach((t, i) => {
+        updatedTasks.set(t.id, t.id === id
+          ? { ...t, status: newStatus, order: i, updatedAt: new Date().toISOString(), ...updates }
+          : { ...t, order: i, updatedAt: new Date().toISOString() }
+        );
+      });
+
+      // Обновляем стейт
+      set((state) => ({
+        tasks: state.tasks.map((t) => {
+          if (updatedTasks.has(t.id)) {
+            return updatedTasks.get(t.id)!;
+          }
+          if (t.id === id) {
+            return { ...t, ...updates, updatedAt: new Date().toISOString() };
+          }
+          return t;
+        }),
+      }));
+    } else {
+      // Статус не изменился - просто обновляем задачу
+      set((state) => ({
+        tasks: state.tasks.map((task) =>
+          task.id === id ? { ...task, ...updates, updatedAt: new Date().toISOString() } : task
+        ),
+      }));
+    }
+
+    // Отправляем на бекенд
+    await taskApi.updateTask(id, {
+      title: updates.title ?? task.title,
+      description: updates.description ?? task.description ?? undefined,
+      date: updates.date ?? task.date,
+      status: updates.status ?? task.status,
+      order: updates.order ?? task.order,
+    });
   },
 
   setEditingTask: (task) => set({ editingTask: task }),
@@ -108,21 +169,47 @@ export const useTaskStore = create<TaskState>((set) => ({
     const task = state.tasks.find(t => t.id === id);
     if (!task) return;
 
-    // Сначала оптимистично обновляем UI
-    set((state) => ({
-      tasks: state.tasks.map((t) =>
-        t.id === id
-          ? { ...t, status: newStatus, order: newOrder, updatedAt: new Date().toISOString() }
-          : t
+    const dateStr = state.selectedDate.toISOString().split('T')[0];
+
+    // Все задачи этой даты
+    const dateTasks = state.tasks.filter(t =>
+      new Date(t.date).toDateString() === new Date(dateStr).toDateString()
+    );
+
+    // Задачи в целевой колонке (без перемещаемой)
+    const targetColumnTasks = dateTasks.filter(t => t.status === newStatus && t.id !== id);
+
+    // Сортируем по order
+    const sorted = [...targetColumnTasks].sort((a, b) => a.order - b.order);
+
+    // Вставляем на новую позицию
+    const insertIndex = Math.min(newOrder, sorted.length);
+    sorted.splice(insertIndex, 0, task);
+
+    // Новый список задач: пересчитанная целевая колонка + остальные задачи
+    const newTasks = [
+      // Целевая колонка с новым order
+      ...sorted.map((t, i) => t.id === id
+        ? { ...t, status: newStatus, order: i, updatedAt: new Date().toISOString() }
+        : { ...t, order: i, updatedAt: new Date().toISOString() }
       ),
-    }));
-    // Затем отправляем полное обновление задачи
+      // Остальные задачи (не целевой колонки и не перемещаемая)
+      ...dateTasks
+        .filter(t => t.status !== newStatus && t.id !== id)
+        .map((t, i) => ({ ...t, order: i, updatedAt: new Date().toISOString() })),
+      // Задачи других дат
+      ...state.tasks.filter(t => new Date(t.date).toDateString() !== new Date(dateStr).toDateString()),
+    ];
+
+    set({ tasks: newTasks });
+
+    // Отправляем на бекенд
     await taskApi.updateTask(id, {
       title: task.title,
       description: task.description ?? undefined,
       date: task.date,
       status: newStatus,
-      order: newOrder,
+      order: insertIndex,
     });
   },
 

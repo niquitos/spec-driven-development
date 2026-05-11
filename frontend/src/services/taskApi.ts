@@ -16,9 +16,8 @@ export const taskApi = {
     return response.data;
   },
 
-  async updateTask(id: number, dto: UpdateTaskDto): Promise<Task> {
-    const response = await api.put<Task>(`/tasks/${id}`, dto);
-    return response.data;
+  async updateTask(id: number, dto: UpdateTaskDto): Promise<void> {
+    await api.put(`/tasks/${id}`, dto);
   },
 
   async deleteTask(id: number): Promise<void> {

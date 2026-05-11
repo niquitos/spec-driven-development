@@ -12,11 +12,13 @@ const columns: { status: TaskStatus; title: string }[] = [
 ];
 
 export function Board() {
-  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask } = useTaskStore();
+  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask, isLoading, error } = useTaskStore();
 
+  // Загружаем задачи только один раз при маунте
   useEffect(() => {
     loadTasks(selectedDate);
-  }, [selectedDate, loadTasks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) {
@@ -44,13 +46,36 @@ export function Board() {
 
     const taskId = Number(result.draggableId);
     const newStatus = Number(result.destination.droppableId) as TaskStatus;
+    const newOrder = result.destination.index;
 
-    moveTask(taskId, newStatus, 0);
+    moveTask(taskId, newStatus, newOrder);
   };
 
   const dateTasks = tasks.filter(
     (task) => new Date(task.date).toDateString() === selectedDate.toDateString()
   );
+
+  if (isLoading) {
+    return (
+      <div className="board-container">
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Загрузка задач...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="board-container">
+        <div className="error-state">
+          <p className="error-message">{error}</p>
+          <button onClick={() => loadTasks(selectedDate)}>Попробовать снова</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

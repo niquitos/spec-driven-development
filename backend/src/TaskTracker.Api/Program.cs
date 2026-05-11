@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using TaskTracker.Application;
+using TaskTracker.Api.Middleware;
 using TaskTracker.Infrastructure;
 using TaskTracker.Infrastructure.Persistence;
 
@@ -66,6 +67,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
+app.UseExceptionMiddleware();
 app.UseAuthorization();
 app.MapControllers();
 
