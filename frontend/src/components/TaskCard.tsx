@@ -56,6 +56,11 @@ export function TaskCard({ task, index }: TaskCardProps) {
             {task.description && (
               <p className="task-card-description">{task.description}</p>
             )}
+            {task.assignee && (
+              <div className="task-card-assignee">
+                <span className="task-card-assignee-label">{task.assignee}</span>
+              </div>
+            )}
           </div>
         )}
       </Draggable>

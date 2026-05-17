@@ -124,19 +124,22 @@ Phase 1 (T001-T010): T001-T003, T007-T010 — pure data/type/migration changes, 
 
 ## Implementation Status
 
-- ❌ Backend: Добавить Assignee в TaskEntity
-- ❌ Backend: Добавить Assignee в CreateTaskCommand / UpdateTaskCommand
-- ❌ Backend: Добавить assignees filter в GetTasksQuery
-- ❌ Backend: Новая миграция EF Core
-- ❌ Backend: Валидация assignee
-- ❌ Backend: Тесты (unit + integration)
-- ❌ Frontend: Добавить assignee в Task type + DTOs
-- ❌ Frontend: AssigneeCombobox компонент
-- ❌ Frontend: Assignee в CreateTaskModal / EditTaskModal
-- ❌ Frontend: Отображение assignee на TaskCard
-- ❌ Frontend: AssigneeFilter компонент
-- ❌ Frontend: Фильтр в URL query-параметрах
-- ❌ Frontend: Тесты
+- ✅ Backend: Добавить Assignee в TaskEntity
+- ✅ Backend: Добавить Assignee в CreateTaskCommand / UpdateTaskCommand
+- ✅ Backend: Добавить assignees filter в GetTasksQuery
+- ✅ Backend: Новая миграция EF Core
+- ✅ Backend: Валидация assignee
+- ✅ Backend: Тесты (unit + integration)
+- ✅ Backend: API endpoint GET /api/tasks/assignees для списка исполнителей
+- ✅ Backend: Структурированное логирование assignee операций
+- ✅ Frontend: Добавить assignee в Task type + DTOs
+- ✅ Frontend: AssigneeCombobox компонент (ARIA + клавиатурная навигация)
+- ✅ Frontend: Assignee в CreateTaskModal / EditTaskModal
+- ✅ Frontend: Отображение assignee на TaskCard
+- ✅ Frontend: AssigneeFilter компонент (ARIA)
+- ✅ Frontend: Фильтр в URL query-параметрах
+- ✅ Frontend: Список исполнителей через отдельный API-запрос, обновляется при мутациях
+- ✅ Frontend: Тесты
 
 ## Constitution Re-Check
 

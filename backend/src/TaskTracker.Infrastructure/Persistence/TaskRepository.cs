@@ -13,14 +13,21 @@ public class TaskRepository : ITaskRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetByDateAsync(DateTime date, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskEntity>> GetByDateAsync(DateTime date, string[]? assignees, CancellationToken cancellationToken)
     {
         var utcDate = date.Kind == DateTimeKind.Unspecified
        ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
        : date.ToUniversalTime();
 
-        return await _context.Tasks
-            .Where(t => t.Date == utcDate.Date)
+        var query = _context.Tasks
+            .Where(t => t.Date == utcDate.Date);
+
+        if (assignees is { Length: > 0 })
+        {
+            query = query.Where(t => t.Assignee != null && assignees.Contains(t.Assignee));
+        }
+
+        return await query
             .OrderBy(t => t.Order)
             .ToListAsync(cancellationToken);
     }
@@ -73,5 +80,19 @@ public class TaskRepository : ITaskRepository
         return await _context.Tasks
             .Where(t => ids.Contains(t.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<string[]> GetAssigneesAsync(DateTime date, CancellationToken cancellationToken)
+    {
+        var utcDate = date.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
+            : date.ToUniversalTime();
+
+        return await _context.Tasks
+            .Where(t => t.Date == utcDate.Date && t.Assignee != null)
+            .Select(t => t.Assignee!)
+            .Distinct()
+            .OrderBy(a => a)
+            .ToArrayAsync(cancellationToken);
     }
 }

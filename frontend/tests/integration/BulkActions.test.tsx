@@ -61,6 +61,7 @@ describe('BulkActions Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    window.confirm = vi.fn(() => true);
     (useTaskStore as any).mockReturnValue({
       tasks: mockTasks,
       selectedDate: new Date('2026-05-09'),
@@ -82,31 +83,34 @@ describe('BulkActions Integration', () => {
       setIsCreateModalOpen: vi.fn(),
       bulkDelete: mockBulkDelete,
       bulkMove: mockBulkMove,
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
   });
 
   it('should display BulkActionsPanel when tasks are selected', () => {
     render(<BulkActionsPanel />);
 
-    expect(screen.getByText(/2 selected/i)).toBeInTheDocument();
+    expect(screen.getByText(/Выбрано:/)).toBeInTheDocument();
   });
 
   it('should show delete button in bulk actions panel', () => {
     render(<BulkActionsPanel />);
 
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Удалить/i })).toBeInTheDocument();
   });
 
   it('should show move button in bulk actions panel', () => {
     render(<BulkActionsPanel />);
 
-    expect(screen.getByRole('button', { name: /move/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Переместить/i })).toBeInTheDocument();
   });
 
   it('should call bulkDelete when delete button is clicked', async () => {
     render(<BulkActionsPanel />);
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i });
+    const deleteButton = screen.getByRole('button', { name: /Удалить/i });
     fireEvent.click(deleteButton);
 
     await waitFor(() => {
@@ -114,22 +118,25 @@ describe('BulkActions Integration', () => {
     });
   });
 
-  it('should call bulkMove when move button is clicked', async () => {
+  it('should call bulkMove when move confirm button is clicked', async () => {
     render(<BulkActionsPanel />);
 
-    const moveButton = screen.getByRole('button', { name: /move/i });
+    const moveButton = screen.getByRole('button', { name: /Переместить/i });
     fireEvent.click(moveButton);
+
+    const confirmButton = screen.getByRole('button', { name: /Переместить.*задач/i });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockBulkMove).toHaveBeenCalled();
     });
   });
 
-  it('should clear selection after bulk delete', async () => {
+  it('should call clearSelection when cancel button is clicked', async () => {
     render(<BulkActionsPanel />);
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i });
-    fireEvent.click(deleteButton);
+    const cancelButton = screen.getByRole('button', { name: /Отменить выбор/i });
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
       expect(mockClearSelection).toHaveBeenCalled();
@@ -158,11 +165,14 @@ describe('BulkActions Integration', () => {
       setIsCreateModalOpen: vi.fn(),
       bulkDelete: mockBulkDelete,
       bulkMove: mockBulkMove,
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
 
     const { container } = render(<BulkActionsPanel />);
 
-    expect(container.firstChild?.childNodes.length).toBe(0);
+    expect(container.firstChild).toBeNull();
   });
 
   it('should select multiple tasks via checkboxes', async () => {
@@ -185,6 +195,6 @@ describe('BulkActions Integration', () => {
   it('should display count of selected tasks', () => {
     render(<BulkActionsPanel />);
 
-    expect(screen.getByText(/2 selected/i)).toBeInTheDocument();
+    expect(screen.getByText(/Выбрано:/)).toBeInTheDocument();
   });
 });

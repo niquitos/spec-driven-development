@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 import { Task, TaskStatus, UpdateTaskDto } from '../../types/task';
+import { AssigneeCombobox } from '../AssigneeCombobox';
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -9,11 +10,12 @@ interface EditTaskModalProps {
 }
 
 export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
-  const { updateTask } = useTaskStore();
+  const { updateTask, getAssigneeList } = useTaskStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [status, setStatus] = useState<TaskStatus>(TaskStatus.New);
+  const [assignee, setAssignee] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +25,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
       setDescription(task.description || '');
       setDate(new Date(task.date).toISOString().split('T')[0]);
       setStatus(task.status);
+      setAssignee(task.assignee || '');
       setError(null);
       setIsSubmitting(false);
     }
@@ -41,6 +44,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
         description: description || undefined,
         date,
         status,
+        assignee: assignee || undefined,
       };
 
       await updateTask(task.id, updates);
@@ -118,6 +122,16 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
               <option value={TaskStatus.InProgress}>В процессе</option>
               <option value={TaskStatus.Done}>Сделаны</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edit-task-assignee" className="form-label">Исполнитель</label>
+            <AssigneeCombobox
+              value={assignee}
+              options={getAssigneeList()}
+              onChange={setAssignee}
+              placeholder="Введите имя исполнителя"
+            />
           </div>
 
           {error && (

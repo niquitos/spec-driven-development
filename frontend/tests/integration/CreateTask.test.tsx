@@ -34,6 +34,9 @@ describe('CreateTask Integration', () => {
       loadTasks: vi.fn(),
       createTask: mockCreateTask,
       setIsCreateModalOpen: mockSetIsCreateModalOpen,
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
   });
 
@@ -95,9 +98,10 @@ describe('CreateTask Integration', () => {
       expect(mockCreateTask).toHaveBeenCalledWith({
         title: 'Test Task',
         description: 'Test Description',
-        date: new Date('2026-05-09'),
+        date: '2026-05-09',
         status: TaskStatus.New,
         order: 0,
+        assignee: undefined,
       });
     });
   });

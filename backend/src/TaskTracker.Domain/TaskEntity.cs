@@ -10,4 +10,5 @@ public class TaskEntity
     public int Order { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string? Assignee { get; set; }
 }

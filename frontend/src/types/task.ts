@@ -13,6 +13,7 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  assignee: string | null;
 }
 
 export interface CreateTaskDto {
@@ -21,6 +22,7 @@ export interface CreateTaskDto {
   date: string;
   status: TaskStatus;
   order?: number;
+  assignee?: string;
 }
 
 export interface UpdateTaskDto {
@@ -29,4 +31,5 @@ export interface UpdateTaskDto {
   date?: string;
   status?: TaskStatus;
   order?: number;
+  assignee?: string;
 }

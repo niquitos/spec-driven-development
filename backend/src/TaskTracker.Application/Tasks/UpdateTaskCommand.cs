@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TaskTracker.Domain;
 
 namespace TaskTracker.Application.Tasks;
@@ -8,16 +9,19 @@ public record UpdateTaskCommand(
     string? Description,
     DateTime Date,
     Domain.TaskStatus Status,
-    int Order
+    int Order,
+    string? Assignee = null
 ) : IRequest;
 
 public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
 {
     private readonly ITaskRepository _repository;
+    private readonly ILogger<UpdateTaskCommandHandler> _logger;
 
-    public UpdateTaskCommandHandler(ITaskRepository repository)
+    public UpdateTaskCommandHandler(ITaskRepository repository, ILogger<UpdateTaskCommandHandler> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     public async Task Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
@@ -29,17 +33,28 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
             throw new KeyNotFoundException($"Task with id {request.Id} not found");
         }
 
+        var oldAssignee = task.Assignee;
+        var newAssignee = string.IsNullOrWhiteSpace(request.Assignee) ? null : request.Assignee;
+
         // Если статус или порядок изменились - пересчитываем order для всех задач в этой колонке
         if (task.Status != request.Status || task.Order != request.Order)
         {
-            await RecalculateOrders(request.Id, request.Status, request.Date.ToUniversalTime(), request.Order, cancellationToken);
+            await RecalculateOrders(request.Id, request.Status, request.Date.Date, request.Order, cancellationToken);
         }
 
         task.Title = request.Title;
         task.Description = request.Description;
-        task.Date = request.Date.ToUniversalTime();
+        task.Date = request.Date.Date;
         task.Status = request.Status;
+        task.Assignee = newAssignee;
         task.UpdatedAt = DateTime.UtcNow;
+
+        if (oldAssignee != newAssignee)
+        {
+            _logger.LogInformation(
+                "Task {TaskId} assignee changed: \"{OldAssignee}\" -> \"{NewAssignee}\"",
+                task.Id, oldAssignee ?? "(none)", newAssignee ?? "(none)");
+        }
 
         await _repository.UpdateAsync(task, cancellationToken);
     }
@@ -47,7 +62,7 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
     private async Task RecalculateOrders(int taskId, Domain.TaskStatus status, DateTime date, int newOrder, CancellationToken cancellationToken)
     {
         // Получаем все задачи по этой дате
-        var allTasks = await _repository.GetByDateAsync(date, cancellationToken);
+        var allTasks = await _repository.GetByDateAsync(date, null, cancellationToken);
         var tasksInColumn = allTasks.Where(t => t.Status == status).ToList();
 
         // Находим перемещаемую задачу
