@@ -115,7 +115,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   addTask: (task) => {
     set((state) => ({ tasks: [...state.tasks, task] }));
-    const state = get();
     get().loadAssigneeList();
   },
 
