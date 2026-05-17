@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: tasktracker-db
+    environment:
+      POSTGRES_DB: tasktracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tasktracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: niquitos1985/tasktracker-api:latest
+    container_name: tasktracker-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=tasktracker;Username=postgres;Password=postgres
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - tasktracker-network
+
+  frontend:
+    image: niquitos1985/tasktracker-frontend:latest
+    container_name: tasktracker-frontend
+    environment:
+      - VITE_API_URL=http://api:8080/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - tasktracker-network
+
+networks:
+  tasktracker-network:
+    driver: bridge
+    
+volumes:
+  postgres_data:
