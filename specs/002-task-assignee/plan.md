@@ -109,7 +109,10 @@ frontend/
 
 ## Complexity Tracking
 
-> Нет нарушений Constitution — Complexity Tracking не требуется.
+Phase 1 (T001-T010): T001-T003, T007-T010 — pure data/type/migration changes, без бизнес-логики.
+Тесты не требуются (YAGNI). **T004-T006 содержат бизнес-логику** (валидация, хендлеры) — для них
+добавлены тесты T003.5, T003.6 в Phase 1 (отступление от стандартного потока TDD для сохранения
+группировки фундаментальных задач).
 
 ## Design Decisions
 

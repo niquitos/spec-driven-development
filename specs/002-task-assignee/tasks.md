@@ -1,38 +1,40 @@
 ---
 
-description: "Task list for assignee feature implementation"
+description: "Список задач для реализации назначения исполнителей"
 
 # Tasks: Назначение исполнителей задач
 
-**Input**: Design documents from `/specs/002-task-assignee/`
+**Input**: Документы из `/specs/002-task-assignee/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/api.md
 
 **Tests**: Включены согласно Test-First принципу конституции проекта. Тесты пишутся до реализации.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Задачи сгруппированы по user story для независимой реализации и тестирования каждой.
 
-## Format: `[ID] [P?] [Story] Description`
+## Формат: `[ID] [P?] [Story] Описание`
 
-- **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
-- Include exact file paths
+- **[P]**: Можно выполнять параллельно (разные файлы, нет зависимостей)
+- **[Story]**: Какая user story (US1, US2, US3)
+- Указывать точный путь к файлу
 
-## Phase 1: Foundational (Blocking Prerequisites)
+## Phase 1: Фундаментальные (Блокирующие)
 
-**Purpose**: Backend model + frontend types — блокирует все user stories
+**Purpose**: Backend-модель + frontend-типы — блокирует все user stories
 
-- [ ] T001 Add Assignee field to TaskEntity in backend/src/TaskTracker.Domain/TaskEntity.cs
-- [ ] T002 [P] Add Assignee field to CreateTaskCommand record in backend/src/TaskTracker.Application/Tasks/CreateTaskCommand.cs
-- [ ] T003 [P] Add Assignee field to UpdateTaskCommand record in backend/src/TaskTracker.Application/Tasks/UpdateTaskCommand.cs
-- [ ] T004 Add Assignee validation to CreateTaskCommandValidator in backend/src/TaskTracker.Application/Tasks/CreateTaskCommand.cs
-- [ ] T005 Add Assignee to TaskEntity mapping in CreateTaskCommandHandler (assign from request)
-- [ ] T006 Add Assignee to TaskEntity mapping in UpdateTaskCommandHandler (assign from request)
-- [ ] T007 [P] Add assignee field to Task interface in frontend/src/types/task.ts
-- [ ] T008 [P] Add assignee field to CreateTaskDto interface in frontend/src/types/task.ts
-- [ ] T009 [P] Add assignee field to UpdateTaskDto interface in frontend/src/types/task.ts
-- [ ] T010 Generate EF Core migration for new Assignee column in backend/src/TaskTracker.Infrastructure/Persistence/Migrations/
+- [ ] T001 Добавить поле Assignee в TaskEntity в backend/src/TaskTracker.Domain/TaskEntity.cs
+- [ ] T002 [P] Добавить поле Assignee в CreateTaskCommand в backend/src/TaskTracker.Application/Tasks/CreateTaskCommand.cs
+- [ ] T003 [P] Добавить поле Assignee в UpdateTaskCommand в backend/src/TaskTracker.Application/Tasks/UpdateTaskCommand.cs
+- [ ] T003.5 [P] [US1] Юнит-тест — CreateTaskCommandHandler проверяет присвоение Assignee в backend/tests/TaskTracker.Application.Tests/Tasks/CreateTaskCommandHandlerTests.cs
+- [ ] T003.6 [P] [US1] Юнит-тест — UpdateTaskCommandHandler проверяет обновление Assignee в backend/tests/TaskTracker.Application.Tests/Tasks/UpdateTaskCommandHandlerTests.cs
+- [ ] T004 Добавить валидацию Assignee в CreateTaskCommandValidator в backend/src/TaskTracker.Infrastructure/Validators/CreateTaskValidator.cs
+- [ ] T005 Добавить присвоение Assignee в CreateTaskCommandHandler в backend/src/TaskTracker.Application/Tasks/CreateTaskCommand.cs
+- [ ] T006 Добавить присвоение Assignee в UpdateTaskCommandHandler в backend/src/TaskTracker.Application/Tasks/UpdateTaskCommand.cs
+- [ ] T007 [P] Добавить поле assignee в интерфейс Task в frontend/src/types/task.ts
+- [ ] T008 [P] Добавить поле assignee в CreateTaskDto в frontend/src/types/task.ts
+- [ ] T009 [P] Добавить поле assignee в UpdateTaskDto в frontend/src/types/task.ts
+- [ ] T010 Создать EF Core миграцию для колонки Assignee в backend/src/TaskTracker.Infrastructure/Persistence/Migrations/
 
-**Checkpoint**: Backend and frontend types updated — assignee field flows through the stack
+**Checkpoint**: Backend и frontend типы обновлены — поле assignee проходит через весь стек
 
 ---
 
@@ -42,22 +44,22 @@ description: "Task list for assignee feature implementation"
 
 **Independent Test**: Создать задачу с новым исполнителем, проверить что имя отображается на карточке. Создать ещё одну задачу — проверить что исполнитель появился в выпадающем списке.
 
-### Tests for User Story 1+2 ⚠️
+### Тесты для User Story 1+2 ⚠️
 
-- [ ] T011 [P] [US1] Unit test for CreateTaskCommandValidator — assignee validation (empty, whitespace, max length) in backend/tests/TaskTracker.Application.Tests/Tasks/CreateTaskCommandValidatorTests.cs
-- [ ] T012 [P] [US1] Unit test for UpdateTaskCommandHandler — assignee update in backend/tests/TaskTracker.Application.Tests/Tasks/UpdateTaskCommandHandlerTests.cs
-- [ ] T013 [US1] Integration test — create task with assignee via API, verify assignee in response in backend/tests/TaskTracker.Integration.Tests/Tasks/CreateTaskTests.cs
-- [ ] T014 [US1] Frontend test — AssigneeCombobox renders existing assignees in frontend/tests/components/AssigneeCombobox.test.tsx
+- [ ] T011 [P] [US1] Юнит-тест CreateTaskCommandValidator — валидация assignee (пусто, пробелы, макс. длина) в backend/tests/TaskTracker.Application.Tests/Tasks/CreateTaskCommandValidatorTests.cs
+- [ ] T012 [P] [US1] Юнит-тест UpdateTaskCommandHandler — обновление assignee в backend/tests/TaskTracker.Application.Tests/Tasks/UpdateTaskCommandHandlerTests.cs
+- [ ] T013 [US1] Интеграционный тест — создание задачи с assignee через API (test-server + test-containers) в backend/tests/TaskTracker.Integration.Tests/Tasks/CreateTaskWithAssigneeTests.cs
+- [ ] T014 [US1] Frontend-тест — AssigneeCombobox отображает существующих исполнителей в frontend/tests/components/AssigneeCombobox.test.tsx
 
-### Implementation for User Stories 1+2
+### Реализация User Stories 1+2
 
-- [ ] T015 [P] [US1] Create AssigneeCombobox component in frontend/src/components/AssigneeCombobox.tsx
-- [ ] T016 [US1] Add assignee field to CreateTaskModal in frontend/src/components/TaskModal/CreateTaskModal.tsx
-- [ ] T017 [US1] Add assignee field to EditTaskModal in frontend/src/components/TaskModal/EditTaskModal.tsx
-- [ ] T018 [US1] Render assignee name on TaskCard in frontend/src/components/TaskCard.tsx
-- [ ] T019 [US1] Add assigneeList derived state to taskStore in frontend/src/stores/taskStore.ts
+- [ ] T015 [P] [US1] Создать компонент AssigneeCombobox в frontend/src/components/AssigneeCombobox.tsx
+- [ ] T016 [US1] Добавить поле assignee в CreateTaskModal в frontend/src/components/TaskModal/CreateTaskModal.tsx
+- [ ] T017 [US1] Добавить поле assignee в EditTaskModal в frontend/src/components/TaskModal/EditTaskModal.tsx
+- [ ] T018 [US1] Отобразить имя исполнителя на TaskCard в frontend/src/components/TaskCard.tsx
+- [ ] T019 [US1] Добавить assigneeList (производный список) в taskStore в frontend/src/stores/taskStore.ts
 
-**Checkpoint**: MVP ready — assignee can be assigned and viewed on the card
+**Checkpoint**: MVP готов — исполнителя можно назначить и видно на карточке
 
 ---
 
@@ -67,116 +69,148 @@ description: "Task list for assignee feature implementation"
 
 **Independent Test**: Выбрать двух исполнителей в фильтре, переключиться на другую дату и обратно — фильтр сохраняется.
 
-### Tests for User Story 3 ⚠️
+### Тесты для User Story 3 ⚠️
 
-- [ ] T020 [P] [US2] Unit test for GetTasksQueryHandler — filter by assignees in backend/tests/TaskTracker.Application.Tests/Tasks/GetTasksQueryHandlerTests.cs
-- [ ] T021 [P] [US2] Integration test — GET /api/tasks?assignees=... filter in backend/tests/TaskTracker.Integration.Tests/Tasks/GetTasksTests.cs
-- [ ] T022 [US2] Frontend test — AssigneeFilter persists selection in URL in frontend/tests/components/AssigneeFilter.test.tsx
+- [ ] T020 [P] [US2] Юнит-тест GetTasksQueryHandler — фильтрация по assignee в backend/tests/TaskTracker.Application.Tests/Tasks/GetTasksQueryHandlerTests.cs
+- [ ] T021 [P] [US2] Интеграционный тест — GET /api/tasks?assignees=... фильтр (test-server + test-containers) в backend/tests/TaskTracker.Integration.Tests/Tasks/FilterByAssigneeTests.cs
+- [ ] T022 [US2] Frontend-тест — AssigneeFilter сохраняет выбор в URL в frontend/tests/components/AssigneeFilter.test.tsx
+- [ ] T022.1 [US2] Frontend-тест — AssigneeFilter отображает визуальный индикатор (цвет + текст) при активном фильтре в frontend/tests/components/AssigneeFilter.test.tsx
 
-### Implementation for User Story 3
+### Реализация User Story 3
 
-- [ ] T023 [US2] Add assignees filter param to GetTasksQuery record in backend/src/TaskTracker.Application/Tasks/GetTasksQuery.cs
-- [ ] T024 [US2] Update GetTasksQueryHandler to filter by assignees list in backend/src/TaskTracker.Application/Tasks/GetTasksQuery.cs
-- [ ] T025 [US2] Update ITaskRepository.GetByDateAsync to support assignee filter in backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs
-- [ ] T026 [US2] Update repository implementation for assignee filtering in backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs
-- [ ] T027 [US2] Add assignees param to GET /api/tasks in backend/src/TaskTracker.Api/Controllers/TasksController.cs
-- [ ] T028 [US2] Create useAssigneeFilter hook in frontend/src/hooks/useAssigneeFilter.ts
-- [ ] T029 [P] [US2] Create AssigneeFilter component in frontend/src/components/AssigneeFilter.tsx
-- [ ] T030 [US2] Add AssigneeFilter to Header component in frontend/src/components/Header.tsx
-- [ ] T031 [US2] Add assignees param to taskApi.getTasks in frontend/src/services/taskApi.ts
-- [ ] T032 [US2] Add assigneeFilter state + filtered tasks logic to taskStore in frontend/src/stores/taskStore.ts
+- [ ] T023 [US2] Добавить параметр assignees фильтра в GetTasksQuery в backend/src/TaskTracker.Application/Tasks/GetTasksQuery.cs
+- [ ] T024 [US2] Обновить GetTasksQueryHandler для фильтрации по списку assignee в backend/src/TaskTracker.Application/Tasks/GetTasksQuery.cs
+- [ ] T025 [US2] Обновить ITaskRepository.GetByDateAsync для поддержки фильтра assignee в backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs
+- [ ] T026 [US2] Обновить реализацию репозитория для фильтрации по assignee в backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs
+- [ ] T027 [US2] Добавить параметр assignees в GET /api/tasks в backend/src/TaskTracker.Api/Controllers/TasksController.cs
+- [ ] T028 [US2] Создать хук useAssigneeFilter в frontend/src/hooks/useAssigneeFilter.ts
+- [ ] T029 [P] [US2] Создать компонент AssigneeFilter в frontend/src/components/AssigneeFilter.tsx
+- [ ] T030 [US2] Добавить AssigneeFilter в Header в frontend/src/components/Header.tsx
+- [ ] T031 [US2] Добавить параметр assignees в taskApi.getTasks в frontend/src/services/taskApi.ts
+- [ ] T032 [US2] Добавить состояние assigneeFilter + логику фильтрации задач в taskStore в frontend/src/stores/taskStore.ts
+- [ ] T032.1 [US2] Отображать сообщение "Нет задач, соответствующих фильтру" при пустом результате в frontend/src/components/TaskBoard.tsx
 
-**Checkpoint**: Filter works — tasks are filtered by assignee, filter persists in URL across date changes
+**Checkpoint**: Фильтр работает — задачи фильтруются по исполнителю, фильтр сохраняется в URL
 
 ---
 
-## Phase 4: Polish & Cross-Cutting Concerns
+## Phase 4: Полировка и сквозные улучшения
 
 **Purpose**: Завершающие улучшения
 
-- [ ] T033 [P] Add ARIA labels and keyboard accessibility to AssigneeCombobox in frontend/src/components/AssigneeCombobox.tsx
-- [ ] T034 [P] Add ARIA labels to AssigneeFilter in frontend/src/components/AssigneeFilter.tsx
-- [ ] T035 Add structured logging for assignee operations in backend handlers
-- [ ] T036 Run quickstart.md validation (migration, build, test)
+- [ ] T033 [P] Добавить ARIA-метки и клавиатурную доступность в AssigneeCombobox в frontend/src/components/AssigneeCombobox.tsx
+- [ ] T034 [P] Добавить ARIA-метки в AssigneeFilter в frontend/src/components/AssigneeFilter.tsx
+- [ ] T034.1 Обработка: удаление последней задачи, соответствующей активному фильтру — фильтр остаётся активным, доска пустая с сообщением в frontend/src/stores/taskStore.ts
+- [ ] T034.2 Тест: удаление единственной задачи под фильтром оставляет фильтр активным в frontend/tests/stores/taskStore.test.ts
+- [ ] T035 Добавить структурированное логирование операций с assignee в backend-обработчиках
+- [ ] T036 Запустить валидацию по quickstart.md (миграция, сборка, тесты)
 
 ---
 
-## Dependencies & Execution Order
+## Phase 5: Техдолг — Интеграционные тесты (Real DB)
 
-### Phase Dependencies
+**Purpose**: Покрыть существующий и новый функционал интеграционными тестами с реальной БД через test-server + test-containers
 
-- **Foundational (Phase 1)**: No dependencies — can start immediately
-- **US1+2 (Phase 2)**: Depends on Phase 1 — BLOCKS all user stories
-- **US3 (Phase 3)**: Depends on Phase 2 (needs assignee data to filter)
-- **Polish (Phase 4)**: Depends on Phase 2, Phase 3
+### Инфраструктура для интеграционных тестов
 
-### User Story Dependencies
+- [ ] T037 Создать скрипт setup-integration-tests.sh для создания тестовой БД (bash: `createdb task_tracker_test`) в scripts/setup-integration-tests.sh
+- [ ] T038 Создать скрипт teardown-integration-tests.sh для удаления тестовой БД (bash: `dropdb task_tracker_test`) в scripts/teardown-integration-tests.sh
+- [ ] T039 Настроить IntegrationTestWebAppFactory с test-containers (PostgreSQL container) в backend/tests/TaskTracker.Integration.Tests/IntegrationTestWebAppFactory.cs
+- [ ] T040 Настроить базовый класс IntegrationTestBase с инициализацией БД и клиентом API в backend/tests/TaskTracker.Integration.Tests/IntegrationTestBase.cs
+- [ ] T041 Создать run-integration-tests.sh (создать БД → dotnet test → удалить БД) в scripts/run-integration-tests.sh
 
-- **User Story 1+2 (P1)**: Can start after Phase 1 — No dependencies on other stories
-- **User Story 3 (P2)**: Depends on US1+2 — needs assignee field on tasks to filter
+### Тесты существующего функционала
 
-### Parallel Opportunities
-
-- All foundational backend tasks (T001-T006) and frontend type tasks (T007-T009) can run in parallel
-- All tests for a user story marked [P] can run in parallel
-- US3 filter backend (T023-T027) and frontend (T028-T032) can be parallelized within the phase
-
----
-
-## Parallel Example: Phase 1 Foundational
-
-```bash
-# Backend domain + frontend types in parallel:
-Task: "T001 Add Assignee to TaskEntity"
-Task: "T002 Add Assignee to CreateTaskCommand"
-Task: "T007 Add assignee to Task type"
-```
-
-## Parallel Example: Phase 2 US1+2
-
-```bash
-# Tests in parallel:
-Task: "T011 CreateTaskCommandValidator tests"
-Task: "T012 UpdateTaskCommandHandler tests"
-
-# Components in parallel:
-Task: "T015 AssigneeCombobox component"
-Task: "T018 TaskCard assignee display"
-```
-
-## Parallel Example: Phase 3 US3
-
-```bash
-# Backend + frontend in parallel:
-Task: "T023 GetTasksQuery assignee filter"
-Task: "T028 useAssigneeFilter hook"
-```
+- [ ] T042 [P] Интеграционный тест — создание задачи (POST /api/tasks) в backend/tests/TaskTracker.Integration.Tests/Tasks/CreateTaskTests.cs
+- [ ] T043 [P] Интеграционный тест — получение задач по дате (GET /api/tasks?date=) в backend/tests/TaskTracker.Integration.Tests/Tasks/GetTasksTests.cs
+- [ ] T044 [P] Интеграционный тест — обновление задачи (PUT /api/tasks/{id}) в backend/tests/TaskTracker.Integration.Tests/Tasks/UpdateTaskTests.cs
+- [ ] T045 [P] Интеграционный тест — удаление задачи (DELETE /api/tasks/{id}) в backend/tests/TaskTracker.Integration.Tests/Tasks/DeleteTaskTests.cs
+- [ ] T046 [P] Интеграционный тест — bulk delete (POST /api/tasks/bulk/delete) в backend/tests/TaskTracker.Integration.Tests/Tasks/BulkDeleteTests.cs
+- [ ] T047 [P] Интеграционный тест — bulk move (POST /api/tasks/bulk/move) в backend/tests/TaskTracker.Integration.Tests/Tasks/BulkMoveTests.cs
+- [ ] T048 [P] Интеграционный тест — валидация (ошибки при пустом заголовке, длинном описании) в backend/tests/TaskTracker.Integration.Tests/Tasks/ValidationTests.cs
+- [ ] T049 Интеграционный тест — ошибка 404 при обновлении/удалении несуществующей задачи в backend/tests/TaskTracker.Integration.Tests/Tasks/NotFoundTests.cs
 
 ---
 
-## Implementation Strategy
+## Зависимости и порядок выполнения
+
+### Зависимости фаз
+
+- **Phase 1**: Нет зависимостей — можно начинать сразу
+- **Phase 2**: Зависит от Phase 1 — БЛОКИРУЕТ все user stories
+- **Phase 3**: Зависит от Phase 2 (нужны данные assignee для фильтрации)
+- **Phase 4**: Зависит от Phase 2, Phase 3
+- **Phase 5**: Не зависит от других фаз — можно выполнять параллельно с Phase 2/3/4
+
+### Зависимости User Story
+
+- **User Story 1+2 (P1)**: Можно начинать после Phase 1 — Нет зависимостей от других stories
+- **User Story 3 (P2)**: Зависит от US1+2 — нужны задачи с assignee для фильтрации
+
+### Возможности для параллельного выполнения
+
+- Все фундаментальные backend-задачи (T001-T006) и frontend-типы (T007-T009) можно выполнять параллельно
+- Все тесты для одной story с меткой [P] можно запускать параллельно
+- Backend (T023-T027) и frontend (T028-T032) в Phase 3 можно параллелить
+
+---
+
+## Примеры параллельного выполнения
+
+### Phase 1
+
+```bash
+# Backend + frontend типы параллельно:
+Task: "T001 Добавить Assignee в TaskEntity"
+Task: "T002 Добавить Assignee в CreateTaskCommand"
+Task: "T007 Добавить assignee в тип Task"
+```
+
+### Phase 2
+
+```bash
+# Тесты параллельно:
+Task: "T011 Тесты CreateTaskCommandValidator"
+Task: "T012 Тесты UpdateTaskCommandHandler"
+
+# Компоненты параллельно:
+Task: "T015 AssigneeCombobox"
+Task: "T018 Отображение на TaskCard"
+```
+
+### Phase 3
+
+```bash
+# Backend + frontend параллельно:
+Task: "T023 Фильтр assignee в GetTasksQuery"
+Task: "T028 Хук useAssigneeFilter"
+```
+
+---
+
+## Стратегия реализации
 
 ### MVP First (Phase 1 + Phase 2)
 
-1. Complete Phase 1: Foundational (backend + types)
-2. Complete Phase 2: US1+2 (assign + view)
-3. **STOP and VALIDATE**: Test assignee creation + display independently
-4. Deploy/demo if ready
+1. Выполнить Phase 1: Фундаментальные (backend + типы)
+2. Выполнить Phase 2: US1+2 (назначение + просмотр)
+3. **ОСТАНОВИТЬСЯ и ПРОВЕРИТЬ**: Протестировать создание assignee + отображение
+4. Деплой/демо если готово
 
-### Incremental Delivery
+### Инкрементальная доставка
 
-1. Complete Phase 1 → Foundation ready
-2. Add Phase 2 (US1+2) → Test independently → Deploy/Demo (MVP!)
-3. Add Phase 3 (US3) → Test independently → Deploy/Demo
-4. Add Phase 4 (Polish) → Final validation
+1. Выполнить Phase 1 → Фундамент готов
+2. Добавить Phase 2 (US1+2) → Протестировать → Деплой/Демо (MVP!)
+3. Добавить Phase 3 (US3) → Протестировать → Деплой/Демо
+4. Добавить Phase 4 (Полировка) → Финальная валидация
 
 ---
 
-## Notes
+## Примечания
 
-- [P] tasks = different files, no dependencies
-- [US1] = User Stories 1+2 (assign/view), [US2] = User Story 3 (filter)
-- Tests MUST fail before implementation (TDD)
-- Assignee is nullable string — no separate entity
-- Filter in URL query params (?assignees=Иван,Петр)
-- Commit after each task or logical group
+- [P] задачи = разные файлы, нет зависимостей
+- [US1] = User Stories 1+2 (назначение/просмотр), [US2] = User Story 3 (фильтр)
+- Тесты ДОЛЖНЫ падать перед реализацией (TDD)
+- Assignee — nullable строка, без отдельной сущности
+- Фильтр в URL query-параметрах (?assignees=Иван,Петр)
+- Коммитить после каждой задачи или логической группы
