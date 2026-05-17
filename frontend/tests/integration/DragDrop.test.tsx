@@ -33,6 +33,9 @@ describe('DragDrop Integration', () => {
       createTask: vi.fn(),
       setIsCreateModalOpen: vi.fn(),
       setEditingTask: vi.fn(),
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
   });
 

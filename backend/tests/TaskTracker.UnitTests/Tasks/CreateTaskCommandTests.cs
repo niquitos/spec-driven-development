@@ -90,4 +90,83 @@ public class CreateTaskCommandValidatorTests
         // Assert
         Assert.Empty(errors);
     }
+
+    [Fact]
+    public async Task Validate_WhenAssigneeIsWhitespace_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            "   "
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenAssigneeExceeds100Characters_ReturnsError()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            new string('A', 101)
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Contains("Assignee must not exceed 100 characters", errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenAssigneeIsValid_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            "Иван"
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenAssigneeIsNull_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
 }

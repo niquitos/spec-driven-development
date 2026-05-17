@@ -2,7 +2,7 @@ using TaskTracker.Domain;
 
 namespace TaskTracker.Application.Tasks;
 
-public record GetTasksQuery(DateTime Date) : IRequest<IEnumerable<TaskEntity>>;
+public record GetTasksQuery(DateTime Date, string[]? Assignees = null) : IRequest<IEnumerable<TaskEntity>>;
 
 public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>>
 {
@@ -15,6 +15,6 @@ public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, IEnumerable<T
 
     public async Task<IEnumerable<TaskEntity>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetByDateAsync(request.Date, cancellationToken);
+        return await _repository.GetByDateAsync(request.Date, request.Assignees, cancellationToken);
     }
 }

@@ -10,6 +10,8 @@ namespace TaskTracker.Api.Controllers;
 public class TasksController : ControllerBase
 {
     private readonly IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> _getTasksHandler;
+    private readonly IRequestHandler<GetTaskByIdQuery, TaskEntity?> _getTaskByIdHandler;
+    private readonly IRequestHandler<GetAssigneesQuery, string[]> _getAssigneesHandler;
     private readonly IRequestHandler<CreateTaskCommand, TaskEntity> _createHandler;
     private readonly IRequestHandler<UpdateTaskCommand> _updateHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
@@ -19,6 +21,8 @@ public class TasksController : ControllerBase
 
     public TasksController(
         IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> getTasksHandler,
+        IRequestHandler<GetTaskByIdQuery, TaskEntity?> getTaskByIdHandler,
+        IRequestHandler<GetAssigneesQuery, string[]> getAssigneesHandler,
         IRequestHandler<CreateTaskCommand, TaskEntity> createHandler,
         IRequestHandler<UpdateTaskCommand> updateHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
@@ -27,6 +31,8 @@ public class TasksController : ControllerBase
         IValidator<CreateTaskCommand> validator)
     {
         _getTasksHandler = getTasksHandler;
+        _getTaskByIdHandler = getTaskByIdHandler;
+        _getAssigneesHandler = getAssigneesHandler;
         _createHandler = createHandler;
         _updateHandler = updateHandler;
         _deleteHandler = deleteHandler;
@@ -36,10 +42,22 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TaskEntity>>> GetTasks([FromQuery] DateTime date)
+    public async Task<ActionResult<IEnumerable<TaskEntity>>> GetTasks(
+        [FromQuery] DateTime date,
+        [FromQuery] string? assignees = null)
     {
-        var tasks = await _getTasksHandler.Handle(new GetTasksQuery(date), CancellationToken.None);
+        var assigneesList = !string.IsNullOrWhiteSpace(assignees)
+            ? assignees.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            : null;
+        var tasks = await _getTasksHandler.Handle(new GetTasksQuery(date, assigneesList), CancellationToken.None);
         return Ok(tasks);
+    }
+
+    [HttpGet("assignees")]
+    public async Task<ActionResult<string[]>> GetAssignees()
+    {
+        var assignees = await _getAssigneesHandler.Handle(new GetAssigneesQuery(), CancellationToken.None);
+        return Ok(assignees);
     }
 
     [HttpPost]
@@ -50,7 +68,8 @@ public class TasksController : ControllerBase
             request.Description,
             request.Date,
             request.Status ?? Domain.TaskStatus.New,
-            request.Order ?? 0
+            request.Order ?? 0,
+            request.Assignee
         );
 
         var validationErrors = await _validator.Validate(command, CancellationToken.None);
@@ -66,13 +85,12 @@ public class TasksController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<TaskEntity>> GetTaskById(int id)
     {
-        var task = await _getTasksHandler.Handle(new GetTasksQuery(DateTime.Today), CancellationToken.None);
-        var foundTask = task.FirstOrDefault(t => t.Id == id);
-        if (foundTask == null)
+        var task = await _getTaskByIdHandler.Handle(new GetTaskByIdQuery(id), CancellationToken.None);
+        if (task == null)
         {
             return NotFound();
         }
-        return Ok(foundTask);
+        return Ok(task);
     }
 
     [HttpPut("{id}")]
@@ -84,7 +102,8 @@ public class TasksController : ControllerBase
             request.Description,
             request.Date,
             request.Status,
-            request.Order
+            request.Order,
+            request.Assignee
         );
 
         await _updateHandler.Handle(command, CancellationToken.None);
@@ -120,7 +139,8 @@ public record CreateTaskRequest(
     string? Description,
     DateTime Date,
     Domain.TaskStatus? Status,
-    int? Order
+    int? Order,
+    string? Assignee
 );
 
 public record UpdateTaskRequest(
@@ -128,7 +148,8 @@ public record UpdateTaskRequest(
     string? Description,
     DateTime Date,
     Domain.TaskStatus Status,
-    int Order
+    int Order,
+    string? Assignee
 );
 
 public record BulkDeleteRequest(

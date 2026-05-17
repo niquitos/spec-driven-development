@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 import { TaskStatus } from '../../types/task';
+import { AssigneeCombobox } from '../AssigneeCombobox';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -10,10 +11,11 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }: CreateTaskModalProps) {
-  const { createTask, setIsCreateModalOpen } = useTaskStore();
+  const { createTask, setIsCreateModalOpen, getAssigneeList } = useTaskStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
+  const [assignee, setAssignee] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +24,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
       setDate(defaultDate.toISOString().split('T')[0]);
       setTitle('');
       setDescription('');
+      setAssignee('');
       setError(null);
       setIsSubmitting(false);
     }
@@ -39,6 +42,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
         date,
         status: defaultStatus,
         order: 0,
+        assignee: assignee || undefined,
       });
       setIsCreateModalOpen(false);
       onClose();
@@ -100,6 +104,16 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
               onChange={(e) => setDate(e.target.value)}
               className="form-input"
               required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="task-assignee" className="form-label">Исполнитель</label>
+            <AssigneeCombobox
+              value={assignee}
+              options={getAssigneeList()}
+              onChange={setAssignee}
+              placeholder="Введите имя исполнителя"
             />
           </div>
 

@@ -1,5 +1,6 @@
 import { useTaskStore } from '../stores/taskStore';
 import { formatDate } from '../utils/date';
+import { AssigneeFilter } from './AssigneeFilter';
 
 interface HeaderProps {
   onNavigate?: (date: Date) => void;
@@ -54,6 +55,7 @@ export function Header({ onNavigate }: HeaderProps) {
       <button onClick={handleNextDay} aria-label="Следующий день">
         →
       </button>
+      <AssigneeFilter />
     </header>
   );
 }

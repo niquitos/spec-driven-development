@@ -23,6 +23,9 @@ vi.mock('../../src/stores/taskStore', () => ({
     moveTask: vi.fn(),
     reorderTask: vi.fn(),
     loadTasks: vi.fn(),
+    assigneeFilter: [],
+    setAssigneeFilter: vi.fn(),
+    getAssigneeList: vi.fn(() => []),
   })),
 }));
 
@@ -48,6 +51,9 @@ describe('DateNavigation Integration', () => {
       moveTask: vi.fn(),
       reorderTask: vi.fn(),
       loadTasks: mockLoadTasks,
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
   });
 
@@ -60,7 +66,7 @@ describe('DateNavigation Integration', () => {
     );
 
     // Click next day
-    fireEvent.click(screen.getByLabelText('Next day'));
+    fireEvent.click(screen.getByLabelText('Следующий день'));
 
     // Verify loadTasks is called with new date
     await waitFor(() => {
@@ -76,7 +82,7 @@ describe('DateNavigation Integration', () => {
       </div>
     );
 
-    const datePicker = screen.getByLabelText('Select date');
+    const datePicker = screen.getByLabelText('Выбрать дату');
     fireEvent.change(datePicker, { target: { value: '2026-01-15' } });
 
     await waitFor(() => {
@@ -127,6 +133,9 @@ describe('DateNavigation Integration', () => {
       moveTask: vi.fn(),
       reorderTask: vi.fn(),
       loadTasks: vi.fn(),
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
 
     render(<Board />);

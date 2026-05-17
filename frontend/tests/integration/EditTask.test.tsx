@@ -14,7 +14,29 @@ describe('EditTask Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useTaskStore as any).mockReturnValue({
+      tasks: [],
+      selectedDate: new Date('2026-05-09'),
+      selectedTaskIds: [],
+      isLoading: false,
+      error: null,
+      isCreateModalOpen: false,
+      editingTask: null,
       updateTask: mockUpdateTask,
+      setTasks: vi.fn(),
+      addTask: vi.fn(),
+      deleteTask: vi.fn(),
+      setSelectedDate: vi.fn(),
+      toggleTaskSelection: vi.fn(),
+      clearSelection: vi.fn(),
+      moveTask: vi.fn(),
+      reorderTask: vi.fn(),
+      loadTasks: vi.fn(),
+      createTask: vi.fn(),
+      setIsCreateModalOpen: vi.fn(),
+      setEditingTask: vi.fn(),
+      assigneeFilter: [],
+      setAssigneeFilter: vi.fn(),
+      getAssigneeList: vi.fn(() => []),
     });
   });
 
@@ -72,7 +94,9 @@ describe('EditTask Integration', () => {
       expect(mockUpdateTask).toHaveBeenCalledWith(1, {
         title: 'Updated Title',
         description: 'Updated Description',
-        date: new Date('2026-05-10'),
+        date: '2026-05-10',
+        status: 0,
+        assignee: undefined,
       });
     });
   });

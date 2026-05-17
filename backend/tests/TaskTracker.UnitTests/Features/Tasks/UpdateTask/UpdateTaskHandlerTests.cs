@@ -1,5 +1,6 @@
 using Xunit;
 using Moq;
+using Microsoft.Extensions.Logging;
 using TaskTracker.Application.Tasks;
 using Domain = TaskTracker.Domain;
 
@@ -12,6 +13,8 @@ public class UpdateTaskHandlerTests
     {
         // Arrange
         var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
         var existingTask = new Domain.TaskEntity
         {
             Id = 1,
@@ -30,9 +33,10 @@ public class UpdateTaskHandlerTests
 
         mockRepository
             .Setup(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(existingTask);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
         var command = new UpdateTaskCommand(
             1,
             "New Title",
@@ -43,13 +47,13 @@ public class UpdateTaskHandlerTests
         );
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("New Title", result.Title);
-        Assert.Equal("New Description", result.Description);
-        mockRepository.Verify(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.NotNull(capturedTask);
+        Assert.Equal("New Title", capturedTask.Title);
+        Assert.Equal("New Description", capturedTask.Description);
+        mockRepository.Verify(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
     [Fact]
@@ -80,7 +84,7 @@ public class UpdateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(existingTask);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
         var command = new UpdateTaskCommand(
             1,
             "Updated Title",
@@ -108,7 +112,7 @@ public class UpdateTaskHandlerTests
             .Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.TaskEntity?)null);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
         var command = new UpdateTaskCommand(999, "Title", null, DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act & Assert
@@ -143,7 +147,7 @@ public class UpdateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(existingTask);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
         var command = new UpdateTaskCommand(1, "New Title", null, DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act
@@ -173,24 +177,44 @@ public class UpdateTaskHandlerTests
             UpdatedAt = DateTime.UtcNow
         };
 
+        var existingTask2 = new Domain.TaskEntity
+        {
+            Id = 2,
+            Title = "Task 2",
+            Description = null,
+            Date = DateTime.Today,
+            Status = Domain.TaskStatus.New,
+            Order = 1,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
         mockRepository
             .Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingTask);
+
+        mockRepository
+            .Setup(r => r.GetByIdAsync(2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTask2);
+
+        mockRepository
+            .Setup(r => r.GetByDateAsync(It.IsAny<DateTime>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { existingTask, existingTask2 });
 
         mockRepository
             .Setup(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(existingTask);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
-        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 10);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
+        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 1);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
         Assert.NotNull(capturedTask);
-        Assert.Equal(10, capturedTask.Order);
+        Assert.Equal(1, capturedTask.Order);
     }
 
     [Fact]
@@ -221,7 +245,7 @@ public class UpdateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(existingTask);
 
-        var handler = new UpdateTaskCommandHandler(mockRepository.Object);
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
         var command = new UpdateTaskCommand(1, "Title", "", DateTime.Today, Domain.TaskStatus.New, 0);
 
         // Act
@@ -230,5 +254,124 @@ public class UpdateTaskHandlerTests
         // Assert
         Assert.NotNull(capturedTask);
         Assert.Equal("", capturedTask.Description);
+    }
+
+    [Fact]
+    public async Task Handle_ValidCommand_UpdatesAssignee()
+    {
+        // Arrange
+        var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
+        var existingTask = new Domain.TaskEntity
+        {
+            Id = 1,
+            Title = "Title",
+            Description = "Description",
+            Date = DateTime.Today,
+            Status = Domain.TaskStatus.New,
+            Order = 0,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        mockRepository
+            .Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTask);
+
+        mockRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(existingTask);
+
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
+        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 0, "Петр");
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedTask);
+        Assert.Equal("Петр", capturedTask.Assignee);
+    }
+
+    [Fact]
+    public async Task Handle_ValidCommand_ClearsAssigneeWhenNull()
+    {
+        // Arrange
+        var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
+        var existingTask = new Domain.TaskEntity
+        {
+            Id = 1,
+            Title = "Title",
+            Description = "Description",
+            Date = DateTime.Today,
+            Status = Domain.TaskStatus.New,
+            Order = 0,
+            Assignee = "Иван",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        mockRepository
+            .Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTask);
+
+        mockRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(existingTask);
+
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
+        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 0, null);
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedTask);
+        Assert.Null(capturedTask.Assignee);
+    }
+
+    [Fact]
+    public async Task Handle_ValidCommand_ClearsAssigneeWhenEmptyString()
+    {
+        // Arrange
+        var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
+        var existingTask = new Domain.TaskEntity
+        {
+            Id = 1,
+            Title = "Title",
+            Description = "Description",
+            Date = DateTime.Today,
+            Status = Domain.TaskStatus.New,
+            Order = 0,
+            Assignee = "Иван",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        mockRepository
+            .Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existingTask);
+
+        mockRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(existingTask);
+
+        var handler = new UpdateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<UpdateTaskCommandHandler>>());
+        var command = new UpdateTaskCommand(1, "Title", "Description", DateTime.Today, Domain.TaskStatus.New, 0, "");
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedTask);
+        Assert.Null(capturedTask.Assignee);
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TaskTracker.Domain;
 
 namespace TaskTracker.Application.Tasks;
@@ -7,7 +8,8 @@ public record CreateTaskCommand(
     string? Description,
     DateTime Date,
     Domain.TaskStatus Status,
-    int Order
+    int Order,
+    string? Assignee = null
 ) : IRequest<TaskEntity>;
 
 public class CreateTaskCommandValidator : IValidator<CreateTaskCommand>
@@ -30,6 +32,11 @@ public class CreateTaskCommandValidator : IValidator<CreateTaskCommand>
             errors.Add("Description must not exceed 2000 characters");
         }
 
+        if (request.Assignee?.Length > 100)
+        {
+            errors.Add("Assignee must not exceed 100 characters");
+        }
+
         return errors;
     }
 }
@@ -37,10 +44,12 @@ public class CreateTaskCommandValidator : IValidator<CreateTaskCommand>
 public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskEntity>
 {
     private readonly ITaskRepository _repository;
+    private readonly ILogger<CreateTaskCommandHandler> _logger;
 
-    public CreateTaskCommandHandler(ITaskRepository repository)
+    public CreateTaskCommandHandler(ITaskRepository repository, ILogger<CreateTaskCommandHandler> logger)
     {
         _repository = repository;
+        _logger = logger;
     }
 
     public async Task<TaskEntity> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -49,13 +58,22 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskE
         {
             Title = request.Title,
             Description = request.Description,
-            Date = request.Date.ToUniversalTime(),
+            Date = request.Date.Date,
             Status = request.Status,
             Order = request.Order,
+            Assignee = string.IsNullOrWhiteSpace(request.Assignee) ? null : request.Assignee,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
-        return await _repository.CreateAsync(task, cancellationToken);
+        var result = await _repository.CreateAsync(task, cancellationToken);
+
+        if (result.Assignee != null)
+        {
+            _logger.LogInformation("Task created with Id: {TaskId}, Assignee: {Assignee}, Title: {Title}",
+                result.Id, result.Assignee, result.Title);
+        }
+
+        return result;
     }
 }

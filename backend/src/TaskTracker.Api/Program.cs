@@ -38,22 +38,12 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        // Option A: Without migrations
-        //await dbContext.Database.EnsureCreatedAsync();
-        
-        // Option B: With migrations (recommended)
          await dbContext.Database.MigrateAsync();
-        
-        // Option C: Check and create
-        // if (!await dbContext.Database.CanConnectAsync())
-        // {
-        //     await dbContext.Database.EnsureCreatedAsync();
-        // }
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while creating the database.");
+        logger.LogError(ex, "An error occurred while migrating.");
         throw;
     }
 }
@@ -65,10 +55,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowFrontend");
 app.UseExceptionMiddleware();
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

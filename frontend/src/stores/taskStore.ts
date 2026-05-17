@@ -15,11 +15,34 @@ function getInitialDate(): Date {
   return new Date();
 }
 
+// Получаем фильтр assignee из URL
+function getInitialAssigneeFilter(): string[] {
+  const params = new URLSearchParams(window.location.search);
+  const assigneesParam = params.get('assignees');
+  if (assigneesParam) {
+    return assigneesParam.split(',').map((a) => a.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 // Обновляем URL при изменении даты
 function updateUrlDate(date: Date) {
   const params = new URLSearchParams(window.location.search);
   const dateStr = date.toISOString().split('T')[0];
   params.set('date', dateStr);
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', newUrl);
+}
+
+// Обновляем URL при изменении фильтра assignee
+function updateUrlAssigneeFilter(assignees: string[]) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('date', params.get('date') || new Date().toISOString().split('T')[0]);
+  if (assignees.length > 0) {
+    params.set('assignees', assignees.join(','));
+  } else {
+    params.delete('assignees');
+  }
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
 }
@@ -32,6 +55,8 @@ interface TaskState {
   error: string | null;
   isCreateModalOpen: boolean;
   editingTask: Task | null;
+  assigneeFilter: string[];
+  assigneeList: string[];
 
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
@@ -43,14 +68,17 @@ interface TaskState {
   moveTask: (id: number, newStatus: TaskStatus, newOrder: number) => Promise<void>;
   reorderTask: (id: number, newOrder: number) => void;
   loadTasks: (date: Date) => Promise<void>;
+  loadAssigneeList: () => Promise<void>;
   createTask: (dto: CreateTaskDto) => Promise<void>;
   setIsCreateModalOpen: (open: boolean) => void;
   setEditingTask: (task: Task | null) => void;
   bulkDelete: () => Promise<void>;
   bulkMove: (targetDate: Date) => Promise<void>;
+  setAssigneeFilter: (assignees: string[]) => void;
+  getAssigneeList: () => string[];
 }
 
-export const useTaskStore = create<TaskState>((set) => ({
+export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   selectedDate: getInitialDate(),
   selectedTaskIds: [],
@@ -58,21 +86,37 @@ export const useTaskStore = create<TaskState>((set) => ({
   error: null,
   isCreateModalOpen: false,
   editingTask: null,
+  assigneeFilter: getInitialAssigneeFilter(),
+  assigneeList: [],
 
   setTasks: (tasks) => set({ tasks }),
 
   loadTasks: async (date) => {
+    const state = get();
     set({ isLoading: true, error: null });
     try {
       const dateStr = date.toISOString().split('T')[0];
-      const tasks = await taskApi.getTasks(dateStr);
+      const tasks = await taskApi.getTasks(dateStr, state.assigneeFilter.length > 0 ? state.assigneeFilter : undefined);
       set({ tasks, isLoading: false });
+      get().loadAssigneeList();
     } catch (error) {
       set({ error: 'Failed to load tasks', isLoading: false });
     }
   },
 
-  addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+  loadAssigneeList: async () => {
+    try {
+      const assigneeList = await taskApi.getAssignees();
+      set({ assigneeList });
+    } catch {
+      // Не фатально
+    }
+  },
+
+  addTask: (task) => {
+    set((state) => ({ tasks: [...state.tasks, task] }));
+    get().loadAssigneeList();
+  },
 
   updateTask: async (id, updates) => {
     const state = useTaskStore.getState();
@@ -141,7 +185,10 @@ export const useTaskStore = create<TaskState>((set) => ({
       date: updates.date ?? task.date,
       status: updates.status ?? task.status,
       order: updates.order ?? task.order,
+      assignee: updates.assignee,
     });
+
+    get().loadAssigneeList();
   },
 
   setEditingTask: (task) => set({ editingTask: task }),
@@ -154,6 +201,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     }));
     // Send request to backend
     await taskApi.deleteTask(id);
+    get().loadAssigneeList();
   },
 
   setSelectedDate: (date) => {
@@ -215,7 +263,10 @@ export const useTaskStore = create<TaskState>((set) => ({
       date: task.date,
       status: newStatus,
       order: insertIndex,
+      assignee: task.assignee ?? undefined,
     });
+
+    get().loadAssigneeList();
   },
 
   reorderTask: (id, newOrder) => set((state) => ({
@@ -236,23 +287,43 @@ export const useTaskStore = create<TaskState>((set) => ({
   bulkDelete: async () => {
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
-    
+
     await taskApi.bulkDelete(selectedTaskIds);
     set((state) => ({
       tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
       selectedTaskIds: [],
     }));
+    get().loadAssigneeList();
   },
 
   bulkMove: async (targetDate) => {
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
-    
+
     const dateStr = targetDate.toISOString().split('T')[0];
     await taskApi.bulkMove(selectedTaskIds, dateStr);
     set((state) => ({
       tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
       selectedTaskIds: [],
     }));
+    get().loadAssigneeList();
+  },
+
+  setAssigneeFilter: (assignees) => {
+    updateUrlAssigneeFilter(assignees);
+    set({ assigneeFilter: assignees });
+    // Перезагружаем задачи с новым фильтром
+    const state = get();
+    const dateStr = state.selectedDate.toISOString().split('T')[0];
+    taskApi.getTasks(dateStr, assignees.length > 0 ? assignees : undefined)
+      .then((tasks) => {
+        set({ tasks });
+        get().loadAssigneeList();
+      })
+      .catch(() => {});
+  },
+
+  getAssigneeList: () => {
+    return get().assigneeList;
   },
 }));

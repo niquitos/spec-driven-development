@@ -1,5 +1,6 @@
 using Xunit;
 using Moq;
+using Microsoft.Extensions.Logging;
 using TaskTracker.Application.Tasks;
 using Domain = TaskTracker.Domain;
 
@@ -28,7 +29,7 @@ public class CreateTaskHandlerTests
             .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdTask);
 
-        var handler = new CreateTaskCommandHandler(mockRepository.Object);
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
         var command = new CreateTaskCommand(
             "Test Task",
             "Test Description",
@@ -60,7 +61,7 @@ public class CreateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
-        var handler = new CreateTaskCommandHandler(mockRepository.Object);
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
         var command = new CreateTaskCommand(
             "Test Task",
             null,
@@ -89,7 +90,7 @@ public class CreateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
-        var handler = new CreateTaskCommandHandler(mockRepository.Object);
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
         var command = new CreateTaskCommand(
             "Test Task",
             null,
@@ -118,7 +119,7 @@ public class CreateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
-        var handler = new CreateTaskCommandHandler(mockRepository.Object);
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
         var command = new CreateTaskCommand(
             "Test Task",
             null,
@@ -147,7 +148,7 @@ public class CreateTaskHandlerTests
             .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
             .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
 
-        var handler = new CreateTaskCommandHandler(mockRepository.Object);
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
         var command = new CreateTaskCommand(
             "Test Task",
             null,
@@ -162,5 +163,64 @@ public class CreateTaskHandlerTests
         // Assert
         Assert.NotNull(capturedTask);
         Assert.Equal(5, capturedTask.Order);
+    }
+
+    [Fact]
+    public async Task Handle_ValidCommand_SetsAssignee()
+    {
+        // Arrange
+        var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
+        mockRepository
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
+
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
+        var command = new CreateTaskCommand(
+            "Test Task",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            "Иван"
+        );
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedTask);
+        Assert.Equal("Иван", capturedTask.Assignee);
+    }
+
+    [Fact]
+    public async Task Handle_ValidCommand_NullAssignee_DoesNotSetAssignee()
+    {
+        // Arrange
+        var mockRepository = new Mock<ITaskRepository>();
+        Domain.TaskEntity? capturedTask = null;
+
+        mockRepository
+            .Setup(r => r.CreateAsync(It.IsAny<Domain.TaskEntity>(), It.IsAny<CancellationToken>()))
+            .Callback<Domain.TaskEntity, CancellationToken>((t, _) => capturedTask = t)
+            .ReturnsAsync(new Domain.TaskEntity { Id = 1 });
+
+        var handler = new CreateTaskCommandHandler(mockRepository.Object, Mock.Of<ILogger<CreateTaskCommandHandler>>());
+        var command = new CreateTaskCommand(
+            "Test Task",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0
+        );
+
+        // Act
+        await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.NotNull(capturedTask);
+        Assert.Null(capturedTask.Assignee);
     }
 }

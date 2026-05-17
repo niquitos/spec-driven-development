@@ -12,7 +12,7 @@ const columns: { status: TaskStatus; title: string }[] = [
 ];
 
 export function Board() {
-  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask, isLoading, error } = useTaskStore();
+  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask, isLoading, error, assigneeFilter } = useTaskStore();
 
   // Загружаем задачи при изменении даты
   useEffect(() => {
@@ -81,6 +81,11 @@ export function Board() {
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="board-container">
         <BulkActionsPanel />
+        {assigneeFilter.length > 0 && dateTasks.length === 0 && (
+          <div className="empty-filter-state">
+            <p>Нет задач, соответствующих фильтру</p>
+          </div>
+        )}
         <div className="board">
           {columns.map((column) => (
             <Column

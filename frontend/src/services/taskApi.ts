@@ -6,8 +6,12 @@ const api = axios.create({
 });
 
 export const taskApi = {
-  async getTasks(date: string): Promise<Task[]> {
-    const response = await api.get<Task[]>('/tasks', { params: { date } });
+  async getTasks(date: string, assignees?: string[]): Promise<Task[]> {
+    const params: Record<string, string> = { date };
+    if (assignees && assignees.length > 0) {
+      params.assignees = assignees.join(',');
+    }
+    const response = await api.get<Task[]>('/tasks', { params });
     return response.data;
   },
 
@@ -31,6 +35,11 @@ export const taskApi = {
 
   async bulkMove(taskIds: number[], targetDate: string): Promise<{ moved: number; targetDate: string }> {
     const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move', { taskIds, targetDate });
+    return response.data;
+  },
+
+  async getAssignees(): Promise<string[]> {
+    const response = await api.get<string[]>('/tasks/assignees');
     return response.data;
   },
 };
