@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TaskTracker.Application.Tasks;
 
-public record GetAssigneesQuery(DateTime Date) : IRequest<string[]>;
+public record GetAssigneesQuery() : IRequest<string[]>;
 
 public class GetAssigneesQueryHandler : IRequestHandler<GetAssigneesQuery, string[]>
 {
@@ -17,8 +17,8 @@ public class GetAssigneesQueryHandler : IRequestHandler<GetAssigneesQuery, strin
 
     public async Task<string[]> Handle(GetAssigneesQuery request, CancellationToken cancellationToken)
     {
-        var assignees = await _repository.GetAssigneesAsync(request.Date, cancellationToken);
-        _logger.LogDebug("Found {Count} unique assignees for date {Date}", assignees.Length, request.Date.ToString("yyyy-MM-dd"));
+        var assignees = await _repository.GetAssigneesAsync(cancellationToken);
+        _logger.LogDebug("Found {Count} unique assignees", assignees.Length);
         return assignees;
     }
 }

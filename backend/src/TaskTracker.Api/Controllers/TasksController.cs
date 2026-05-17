@@ -54,9 +54,9 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("assignees")]
-    public async Task<ActionResult<string[]>> GetAssignees([FromQuery] DateTime date)
+    public async Task<ActionResult<string[]>> GetAssignees()
     {
-        var assignees = await _getAssigneesHandler.Handle(new GetAssigneesQuery(date), CancellationToken.None);
+        var assignees = await _getAssigneesHandler.Handle(new GetAssigneesQuery(), CancellationToken.None);
         return Ok(assignees);
     }
 

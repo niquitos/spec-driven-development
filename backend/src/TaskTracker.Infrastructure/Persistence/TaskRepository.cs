@@ -34,7 +34,7 @@ public class TaskRepository : ITaskRepository
 
     public async Task<TaskEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await _context.Tasks.FindAsync(new object[] { id }, cancellationToken);
+        return await _context.Tasks.FindAsync([id], cancellationToken);
     }
 
     public async Task<TaskEntity> CreateAsync(TaskEntity task, CancellationToken cancellationToken)
@@ -60,6 +60,20 @@ public class TaskRepository : ITaskRepository
 
     public async Task<TaskEntity> UpdateAsync(TaskEntity task, CancellationToken cancellationToken)
     {
+        if (task.Date.Kind != DateTimeKind.Utc)
+        {
+            task.Date = DateTime.SpecifyKind(task.Date, DateTimeKind.Utc);
+        }
+        if (task.CreatedAt.Kind != DateTimeKind.Utc)
+        {
+            task.CreatedAt = DateTime.SpecifyKind(task.CreatedAt, DateTimeKind.Utc);
+        }
+
+        if (task.UpdatedAt.Kind != DateTimeKind.Utc)
+        {
+            task.UpdatedAt = DateTime.SpecifyKind(task.UpdatedAt, DateTimeKind.Utc);
+        }
+
         _context.Tasks.Update(task);
         await _context.SaveChangesAsync(cancellationToken);
         return task;
@@ -82,17 +96,13 @@ public class TaskRepository : ITaskRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<string[]> GetAssigneesAsync(DateTime date, CancellationToken cancellationToken)
+    public async Task<string[]> GetAssigneesAsync(CancellationToken ct)
     {
-        var utcDate = date.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
-            : date.ToUniversalTime();
-
         return await _context.Tasks
-            .Where(t => t.Date == utcDate.Date && t.Assignee != null)
+            .Where(t => t.Assignee != null)
             .Select(t => t.Assignee!)
             .Distinct()
             .OrderBy(a => a)
-            .ToArrayAsync(cancellationToken);
+            .ToArrayAsync(ct);
     }
 }

@@ -9,7 +9,6 @@ COPY ["src/TaskTracker.Api/TaskTracker.Api.csproj", "src/TaskTracker.Api/"]
 COPY ["src/TaskTracker.Application/TaskTracker.Application.csproj", "src/TaskTracker.Application/"]
 COPY ["src/TaskTracker.Domain/TaskTracker.Domain.csproj", "src/TaskTracker.Domain/"]
 COPY ["src/TaskTracker.Infrastructure/TaskTracker.Infrastructure.csproj", "src/TaskTracker.Infrastructure/"]
-COPY ["src/TaskTracker.Cli/TaskTracker.Cli.csproj", "src/TaskTracker.Cli/"]
 RUN dotnet restore "src/TaskTracker.Api/TaskTracker.Api.csproj"
 
 COPY . .

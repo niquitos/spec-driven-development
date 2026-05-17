@@ -68,7 +68,7 @@ interface TaskState {
   moveTask: (id: number, newStatus: TaskStatus, newOrder: number) => Promise<void>;
   reorderTask: (id: number, newOrder: number) => void;
   loadTasks: (date: Date) => Promise<void>;
-  loadAssigneeList: (date: Date) => Promise<void>;
+  loadAssigneeList: () => Promise<void>;
   createTask: (dto: CreateTaskDto) => Promise<void>;
   setIsCreateModalOpen: (open: boolean) => void;
   setEditingTask: (task: Task | null) => void;
@@ -98,16 +98,15 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const dateStr = date.toISOString().split('T')[0];
       const tasks = await taskApi.getTasks(dateStr, state.assigneeFilter.length > 0 ? state.assigneeFilter : undefined);
       set({ tasks, isLoading: false });
-      get().loadAssigneeList(date);
+      get().loadAssigneeList();
     } catch (error) {
       set({ error: 'Failed to load tasks', isLoading: false });
     }
   },
 
-  loadAssigneeList: async (date) => {
+  loadAssigneeList: async () => {
     try {
-      const dateStr = date.toISOString().split('T')[0];
-      const assigneeList = await taskApi.getAssignees(dateStr);
+      const assigneeList = await taskApi.getAssignees();
       set({ assigneeList });
     } catch {
       // Не фатально
@@ -117,7 +116,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   addTask: (task) => {
     set((state) => ({ tasks: [...state.tasks, task] }));
     const state = get();
-    get().loadAssigneeList(state.selectedDate);
+    get().loadAssigneeList();
   },
 
   updateTask: async (id, updates) => {
@@ -190,7 +189,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       assignee: updates.assignee,
     });
 
-    get().loadAssigneeList(get().selectedDate);
+    get().loadAssigneeList();
   },
 
   setEditingTask: (task) => set({ editingTask: task }),
@@ -203,7 +202,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }));
     // Send request to backend
     await taskApi.deleteTask(id);
-    get().loadAssigneeList(get().selectedDate);
+    get().loadAssigneeList();
   },
 
   setSelectedDate: (date) => {
@@ -268,7 +267,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       assignee: task.assignee ?? undefined,
     });
 
-    get().loadAssigneeList(get().selectedDate);
+    get().loadAssigneeList();
   },
 
   reorderTask: (id, newOrder) => set((state) => ({
@@ -295,7 +294,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
       selectedTaskIds: [],
     }));
-    get().loadAssigneeList(get().selectedDate);
+    get().loadAssigneeList();
   },
 
   bulkMove: async (targetDate) => {
@@ -308,7 +307,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
       selectedTaskIds: [],
     }));
-    get().loadAssigneeList(get().selectedDate);
+    get().loadAssigneeList();
   },
 
   setAssigneeFilter: (assignees) => {
@@ -320,7 +319,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     taskApi.getTasks(dateStr, assignees.length > 0 ? assignees : undefined)
       .then((tasks) => {
         set({ tasks });
-        get().loadAssigneeList(state.selectedDate);
+        get().loadAssigneeList();
       })
       .catch(() => {});
   },

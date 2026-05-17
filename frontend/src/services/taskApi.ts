@@ -38,8 +38,8 @@ export const taskApi = {
     return response.data;
   },
 
-  async getAssignees(date: string): Promise<string[]> {
-    const response = await api.get<string[]>('/tasks/assignees', { params: { date } });
+  async getAssignees(): Promise<string[]> {
+    const response = await api.get<string[]>('/tasks/assignees');
     return response.data;
   },
 };
