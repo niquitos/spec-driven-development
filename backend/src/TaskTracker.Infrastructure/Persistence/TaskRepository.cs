@@ -105,4 +105,20 @@ public class TaskRepository : ITaskRepository
             .OrderBy(a => a)
             .ToArrayAsync(ct);
     }
+
+    public async Task<int> MoveIncompleteToTomorrowAsync(DateTime tomorrow, CancellationToken cancellationToken)
+    {
+        var utcTomorrow = tomorrow.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(tomorrow, DateTimeKind.Utc)
+            : tomorrow.ToUniversalTime();
+
+        var result = await _context.Tasks
+            .Where(t => t.Status != Domain.TaskStatus.Done)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(t => t.Date, utcTomorrow.Date)
+                .SetProperty(t => t.UpdatedAt, DateTime.UtcNow),
+                cancellationToken);
+
+        return result;
+    }
 }

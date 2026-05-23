@@ -42,4 +42,9 @@ export const taskApi = {
     const response = await api.get<string[]>('/tasks/assignees');
     return response.data;
   },
+
+  async moveIncompleteToTomorrow(): Promise<{ moved: number; targetDate: string }> {
+    const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move-incomplete-to-tomorrow');
+    return response.data;
+  },
 };

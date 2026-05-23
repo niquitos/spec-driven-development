@@ -17,6 +17,7 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
+    private readonly IRequestHandler<MoveIncompleteToTomorrowCommand, MoveIncompleteToTomorrowResponse> _moveIncompleteToTomorrowHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
 
     public TasksController(
@@ -28,6 +29,7 @@ public class TasksController : ControllerBase
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
+        IRequestHandler<MoveIncompleteToTomorrowCommand, MoveIncompleteToTomorrowResponse> moveIncompleteToTomorrowHandler,
         IValidator<CreateTaskCommand> validator)
     {
         _getTasksHandler = getTasksHandler;
@@ -38,6 +40,7 @@ public class TasksController : ControllerBase
         _deleteHandler = deleteHandler;
         _bulkDeleteHandler = bulkDeleteHandler;
         _bulkMoveHandler = bulkMoveHandler;
+        _moveIncompleteToTomorrowHandler = moveIncompleteToTomorrowHandler;
         _validator = validator;
     }
 
@@ -130,6 +133,14 @@ public class TasksController : ControllerBase
     {
         var command = new BulkMoveCommand(request.TaskIds, request.TargetDate);
         var result = await _bulkMoveHandler.Handle(command, CancellationToken.None);
+        return Ok(result);
+    }
+
+    [HttpPost("bulk/move-incomplete-to-tomorrow")]
+    public async Task<ActionResult<MoveIncompleteToTomorrowResponse>> MoveIncompleteToTomorrow()
+    {
+        var command = new MoveIncompleteToTomorrowCommand();
+        var result = await _moveIncompleteToTomorrowHandler.Handle(command, CancellationToken.None);
         return Ok(result);
     }
 }

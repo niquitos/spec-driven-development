@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Task, TaskStatus, CreateTaskDto, UpdateTaskDto } from '../types/task';
 import { taskApi } from '../services/taskApi';
+import { addToast } from '../components/Toast';
 
 // Получаем дату из URL или возвращаем сегодня
 function getInitialDate(): Date {
@@ -74,6 +75,8 @@ interface TaskState {
   setEditingTask: (task: Task | null) => void;
   bulkDelete: () => Promise<void>;
   bulkMove: (targetDate: Date) => Promise<void>;
+  isMovingToTomorrow: boolean;
+  moveIncompleteToTomorrow: () => Promise<void>;
   setAssigneeFilter: (assignees: string[]) => void;
   getAssigneeList: () => string[];
 }
@@ -88,6 +91,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   editingTask: null,
   assigneeFilter: getInitialAssigneeFilter(),
   assigneeList: [],
+  isMovingToTomorrow: false,
 
   setTasks: (tasks) => set({ tasks }),
 
@@ -288,25 +292,55 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
 
-    await taskApi.bulkDelete(selectedTaskIds);
-    set((state) => ({
-      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
-      selectedTaskIds: [],
-    }));
-    get().loadAssigneeList();
+    const count = selectedTaskIds.length;
+    try {
+      await taskApi.bulkDelete(selectedTaskIds);
+      set((state) => ({
+        tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+        selectedTaskIds: [],
+      }));
+      get().loadAssigneeList();
+      addToast(`Удалено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
+    } catch {
+      addToast('Ошибка при удалении задач', 'error');
+    }
   },
 
   bulkMove: async (targetDate) => {
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
 
+    const count = selectedTaskIds.length;
     const dateStr = targetDate.toISOString().split('T')[0];
-    await taskApi.bulkMove(selectedTaskIds, dateStr);
-    set((state) => ({
-      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
-      selectedTaskIds: [],
-    }));
-    get().loadAssigneeList();
+    try {
+      await taskApi.bulkMove(selectedTaskIds, dateStr);
+      set((state) => ({
+        tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+        selectedTaskIds: [],
+      }));
+      get().loadAssigneeList();
+      addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
+    } catch {
+      addToast('Ошибка при перемещении задач', 'error');
+    }
+  },
+
+  moveIncompleteToTomorrow: async () => {
+    set({ isMovingToTomorrow: true });
+    try {
+      const result = await taskApi.moveIncompleteToTomorrow();
+      if (result.moved > 0) {
+        const count = result.moved;
+        addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'} на завтра`);
+        await get().loadTasks(get().selectedDate);
+      } else {
+        addToast('Нет задач для переноса', 'info');
+      }
+    } catch {
+      addToast('Ошибка при переносе задач на завтра', 'error');
+    } finally {
+      set({ isMovingToTomorrow: false });
+    }
   },
 
   setAssigneeFilter: (assignees) => {

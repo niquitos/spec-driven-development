@@ -12,12 +12,20 @@ export function TaskCheckbox({ taskId }: TaskCheckboxProps) {
     toggleTaskSelection(taskId);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      toggleTaskSelection(taskId);
+    }
+  };
+
   return (
     <input
       type="checkbox"
       checked={isSelected}
       onChange={handleChange}
-      aria-label={`Выбрать задачу ${taskId}`}
+      onKeyDown={handleKeyDown}
+      aria-label={`Выделить задачу ${taskId}`}
       className="task-checkbox"
       onClick={(e) => e.stopPropagation()}
     />

@@ -11,9 +11,7 @@ export function BulkActionsPanel() {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Удалить ${selectedTaskIds.length} выбранных задач?`)) {
-      await bulkDelete();
-    }
+    await bulkDelete();
   };
 
   const handleBulkMove = async () => {

@@ -11,4 +11,5 @@ public interface ITaskRepository
     Task DeleteAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<TaskEntity>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
     Task<string[]> GetAssigneesAsync(CancellationToken ct);
+    Task<int> MoveIncompleteToTomorrowAsync(DateTime tomorrow, CancellationToken cancellationToken);
 }

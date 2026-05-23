@@ -7,7 +7,7 @@ interface HeaderProps {
 }
 
 export function Header({ onNavigate }: HeaderProps) {
-  const { selectedDate, setSelectedDate } = useTaskStore();
+  const { selectedDate, setSelectedDate, isMovingToTomorrow, moveIncompleteToTomorrow } = useTaskStore();
 
   const handlePrevDay = () => {
     const newDate = new Date(selectedDate);
@@ -35,6 +35,10 @@ export function Header({ onNavigate }: HeaderProps) {
     onNavigate?.(newDate);
   };
 
+  const handleMoveToTomorrow = () => {
+    moveIncompleteToTomorrow();
+  };
+
   return (
     <header className="header">
       <button onClick={handlePrevDay} aria-label="Предыдущий день">
@@ -54,6 +58,14 @@ export function Header({ onNavigate }: HeaderProps) {
       </div>
       <button onClick={handleNextDay} aria-label="Следующий день">
         →
+      </button>
+      <button
+        onClick={handleMoveToTomorrow}
+        className="btn btn-move-tomorrow"
+        disabled={isMovingToTomorrow}
+        aria-label="Перенести невыполненные задачи на завтра"
+      >
+        {isMovingToTomorrow ? 'Перенос...' : '→ Завтра'}
       </button>
       <AssigneeFilter />
     </header>

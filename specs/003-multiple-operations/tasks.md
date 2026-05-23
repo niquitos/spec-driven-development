@@ -28,9 +28,9 @@
 
 **⚠️ КРИТИЧНО**: Работа над пользовательскими историями не может начаться, пока эта фаза не завершена
 
-- [ ] T001 [P] Добавить метод `MoveIncompleteToTomorrowAsync(DateTime tomorrow, CancellationToken ct)` в интерфейс `ITaskRepository` в `backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs` (сигнатура из data-model.md)
-- [ ] T002 [P] Создать простой механизм уведомлений в `frontend/src/components/Toast.tsx` — текстовое уведомление с автозакрытием (3 сек), без внешних зависимостей. Используется для обратной связи после массовых операций (FR-017) и сообщений об ошибках (FR-013). Добавить стили в `frontend/src/index.css` в конец файла, в секцию `/* Notifications */`
-- [ ] T003 Реализовать метод `MoveIncompleteToTomorrowAsync` через `ExecuteUpdateAsync` в `backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs` — обновляет `Date` всех задач с `Status != Done` на значение `tomorrow`, устанавливает `UpdatedAt = DateTime.UtcNow`, возвращает количество обновлённых записей (зависит от T001)
+- [x] T001 [P] Добавить метод `MoveIncompleteToTomorrowAsync(DateTime tomorrow, CancellationToken ct)` в интерфейс `ITaskRepository` в `backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs` (сигнатура из data-model.md)
+- [x] T002 [P] Создать простой механизм уведомлений в `frontend/src/components/Toast.tsx` — текстовое уведомление с автозакрытием (3 сек), без внешних зависимостей. Используется для обратной связи после массовых операций (FR-017) и сообщений об ошибках (FR-013). Добавить стили в `frontend/src/index.css` в конец файла, в секцию `/* Notifications */`
+- [x] T003 Реализовать метод `MoveIncompleteToTomorrowAsync` через `ExecuteUpdateAsync` в `backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs` — обновляет `Date` всех задач с `Status != Done` на значение `tomorrow`, устанавливает `UpdatedAt = DateTime.UtcNow`, возвращает количество обновлённых записей (зависит от T001)
 
 **Контрольная точка**: Фундамент готов — интерфейс репозитория расширен, механизм уведомлений создан, метод репозитория реализован
 
@@ -44,9 +44,9 @@
 
 ### Реализация Пользовательской истории 1
 
-- [ ] T004 [US1] Удалить `window.confirm()` из `handleBulkDelete` в `frontend/src/components/BulkActions/BulkActionsPanel.tsx` — заменить условное выполнение на прямой вызов `await bulkDelete()` без проверки (FR-005: все массовые операции без подтверждений)
-- [ ] T005 [US1] Добавить обратную связь после массового удаления в `frontend/src/stores/taskStore.ts` — после `bulkDelete` показать уведомление «Удалено N задач» через механизм из T002, где N = `selectedTaskIds.length` до удаления (FR-017)
-- [ ] T006 [US1] Добавить обработку ошибок API для `bulkDelete` в `frontend/src/stores/taskStore.ts` — при ошибке API показать уведомление об ошибке и сохранить текущее состояние задач без изменений (FR-013)
+- [x] T004 [US1] Удалить `window.confirm()` из `handleBulkDelete` в `frontend/src/components/BulkActions/BulkActionsPanel.tsx` — заменить условное выполнение на прямой вызов `await bulkDelete()` без проверки (FR-005: все массовые операции без подтверждений)
+- [x] T005 [US1] Добавить обратную связь после массового удаления в `frontend/src/stores/taskStore.ts` — после `bulkDelete` показать уведомление «Удалено N задач» через механизм из T002, где N = `selectedTaskIds.length` до удаления (FR-017)
+- [x] T006 [US1] Добавить обработку ошибок API для `bulkDelete` в `frontend/src/stores/taskStore.ts` — при ошибке API показать уведомление об ошибке и сохранить текущее состояние задач без изменений (FR-013)
 
 **Контрольная точка**: Пользовательская история 1 полностью функциональна — массовое удаление работает без подтверждения, с обратной связью и обработкой ошибок
 
@@ -62,8 +62,8 @@
 
 ### Реализация Пользовательской истории 2
 
-- [ ] T007 [US2] Добавить обратную связь после массового изменения даты в `frontend/src/stores/taskStore.ts` — после `bulkMove` показать уведомление «Перенесено N задач» через механизм из T002, где N = `selectedTaskIds.length` до перемещения (FR-017)
-- [ ] T008 [US2] Добавить обработку ошибок API для `bulkMove` в `frontend/src/stores/taskStore.ts` — при ошибке API показать уведомление об ошибке и сохранить текущее состояние задач без изменений (FR-013)
+- [x] T007 [US2] Добавить обратную связь после массового изменения даты в `frontend/src/stores/taskStore.ts` — после `bulkMove` показать уведомление «Перенесено N задач» через механизм из T002, где N = `selectedTaskIds.length` до перемещения (FR-017)
+- [x] T008 [US2] Добавить обработку ошибок API для `bulkMove` в `frontend/src/stores/taskStore.ts` — при ошибке API показать уведомление об ошибке и сохранить текущее состояние задач без изменений (FR-013)
 
 **Контрольная точка**: Пользовательские истории 1 и 2 обе работают независимо с обратной связью и обработкой ошибок
 
@@ -77,12 +77,12 @@
 
 ### Реализация Пользовательской истории 3
 
-- [ ] T009 [P] [US3] Создать `MoveIncompleteToTomorrowCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — Command record без параметров, Response record `MoveIncompleteToTomorrowResponse(int Moved, DateTime TargetDate)`, Handler: вызвать `_repository.MoveIncompleteToTomorrowAsync(DateTime.UtcNow.Date.AddDays(1), ct)`, вернуть `MoveIncompleteToTomorrowResponse` с количеством (зависит от T001, T003)
-- [ ] T010 [US3] Добавить эндпоинт `POST /api/tasks/bulk/move-incomplete-to-tomorrow` в `backend/src/TaskTracker.Api/Controllers/TasksController.cs` — создать `MoveIncompleteToTomorrowCommand`, вернуть `MoveIncompleteToTomorrowResponse` (зависит от T009)
-- [ ] T011 [P] [US3] Добавить метод `moveIncompleteToTomorrow(): Promise<{ moved: number; targetDate: string }>` в `frontend/src/services/taskApi.ts` — POST запрос на `/tasks/bulk/move-incomplete-to-tomorrow` без тела запроса (согласно contracts/api.md)
-- [ ] T012 [US3] Добавить action `moveIncompleteToTomorrow()` в `frontend/src/stores/taskStore.ts` — вызвать `taskApi.moveIncompleteToTomorrow()`, при `moved > 0` перезагрузить список задач текущего дня через `loadTasks(selectedDate)` и показать уведомление «Перенесено N задач» через механизм из T002 (FR-017), при `moved === 0` показать уведомление «Нет задач для переноса» (FR-020). При ошибке API — показать уведомление об ошибке, сохранить текущее состояние (FR-013). Кнопка блокируется на время запроса для предотвращения повторных нажатий (FR-021) (зависит от T002, T011)
-- [ ] T013 [US3] Добавить кнопку «Перенести на завтра» в `frontend/src/components/Header.tsx` — кнопка доступна всегда (не зависит от выделения, FR-019), вызывает `taskStore.moveIncompleteToTomorrow()`, блокируется (`disabled`) на время выполнения запроса для предотвращения повторных нажатий (FR-021), визуально соответствует стилю `.btn-secondary` из index.css. Использовать `useTaskStore` для получения состояния `isLoading` (зависит от T012)
-- [ ] T014 [P] [US3] Добавить стили для кнопки «Перенести на завтра» в `frontend/src/index.css` — в секции `.header button` или как отдельный класс `.btn-move-tomorrow`, визуально отличать от навигационных кнопок (цвет/иконка), обеспечить `disabled`-стиль (opacity, cursor)
+- [x] T009 [P] [US3] Создать `MoveIncompleteToTomorrowCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — Command record без параметров, Response record `MoveIncompleteToTomorrowResponse(int Moved, DateTime TargetDate)`, Handler: вызвать `_repository.MoveIncompleteToTomorrowAsync(DateTime.UtcNow.Date.AddDays(1), ct)`, вернуть `MoveIncompleteToTomorrowResponse` с количеством (зависит от T001, T003)
+- [x] T010 [US3] Добавить эндпоинт `POST /api/tasks/bulk/move-incomplete-to-tomorrow` в `backend/src/TaskTracker.Api/Controllers/TasksController.cs` — создать `MoveIncompleteToTomorrowCommand`, вернуть `MoveIncompleteToTomorrowResponse` (зависит от T009)
+- [x] T011 [P] [US3] Добавить метод `moveIncompleteToTomorrow(): Promise<{ moved: number; targetDate: string }>` в `frontend/src/services/taskApi.ts` — POST запрос на `/tasks/bulk/move-incomplete-to-tomorrow` без тела запроса (согласно contracts/api.md)
+- [x] T012 [US3] Добавить action `moveIncompleteToTomorrow()` в `frontend/src/stores/taskStore.ts` — вызвать `taskApi.moveIncompleteToTomorrow()`, при `moved > 0` перезагрузить список задач текущего дня через `loadTasks(selectedDate)` и показать уведомление «Перенесено N задач» через механизм из T002 (FR-017), при `moved === 0` показать уведомление «Нет задач для переноса» (FR-020). При ошибке API — показать уведомление об ошибке, сохранить текущее состояние (FR-013). Кнопка блокируется на время запроса для предотвращения повторных нажатий (FR-021) (зависит от T002, T011)
+- [x] T013 [US3] Добавить кнопку «Перенести на завтра» в `frontend/src/components/Header.tsx` — кнопка доступна всегда (не зависит от выделения, FR-019), вызывает `taskStore.moveIncompleteToTomorrow()`, блокируется (`disabled`) на время выполнения запроса для предотвращения повторных нажатий (FR-021), визуально соответствует стилю `.btn-secondary` из index.css. Использовать `useTaskStore` для получения состояния `isLoading` (зависит от T012)
+- [x] T014 [P] [US3] Добавить стили для кнопки «Перенести на завтра» в `frontend/src/index.css` — в секции `.header button` или как отдельный класс `.btn-move-tomorrow`, визуально отличать от навигационных кнопок (цвет/иконка), обеспечить `disabled`-стиль (opacity, cursor)
 
 **Контрольная точка**: Все пользовательские истории независимо функциональны с обратной связью и обработкой ошибок
 
@@ -92,8 +92,8 @@
 
 **Цель**: Улучшения, затрагивающие несколько пользовательских историй
 
-- [ ] T015 [P] Обеспечить доступность с клавиатуры для чекбоксов выделения в `frontend/src/components/Board/TaskCheckbox.tsx` — добавить Tab для навигации до чекбокса, Space/Enter для переключения (FR-022). Проверить существующий `aria-label` и при необходимости дополнить
-- [ ] T016 [P] Убедиться, что при массовом удалении всех задач отображается пустое состояние (empty state) — проверить существующую обработку в Board.tsx, при необходимости добавить условие рендеринга empty state (FR-023)
+- [x] T015 [P] Обеспечить доступность с клавиатуры для чекбоксов выделения в `frontend/src/components/Board/TaskCheckbox.tsx` — добавить Tab для навигации до чекбокса, Space/Enter для переключения (FR-022). Проверить существующий `aria-label` и при необходимости дополнить
+- [x] T016 [P] Убедиться, что при массовом удалении всех задач отображается пустое состояние (empty state) — проверить существующую обработку в Board.tsx, при необходимости добавить условие рендеринга empty state (FR-023)
 
 ---
 
