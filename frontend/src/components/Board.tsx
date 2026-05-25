@@ -70,13 +70,13 @@ export function Board() {
 
     // Determine if swimlane changed
     if (sourceSwimlaneKey !== destSwimlaneKey) {
-      // Vertical move: update swimlane
+      // Vertical move: update swimlane + status + order in single call
       const newSwimlane = destSwimlaneKey === DEFAULT_SWIMLANE_KEY ? null : destSwimlaneKey;
-      updateTask(taskId, { swimlane: newSwimlane });
+      updateTask(taskId, { swimlane: newSwimlane, status: newStatus, order: newOrder });
+    } else {
+      // Only status/order changed
+      moveTask(taskId, newStatus, newOrder);
     }
-
-    // Always update status and order
-    moveTask(taskId, newStatus, newOrder);
   };
 
   const dateTasks = useMemo(
@@ -123,6 +123,13 @@ export function Board() {
           </div>
         )}
         <div className="board board--swimlanes">
+          {/* Фон столбцов — непрерывные полосы */}
+          <div className="board-columns-bg" aria-hidden="true">
+            {columns.map((column) => (
+              <div key={column.status} className="board-column-bg"></div>
+            ))}
+          </div>
+          {/* Заголовки столбцов */}
           <div className="board-columns-header">
             {columns.map((column) => (
               <div key={column.status} className="board-column-header">
@@ -130,22 +137,25 @@ export function Board() {
               </div>
             ))}
           </div>
-          {swimlaneGroups.map((group) => {
-            const groupKey = normalizeSwimlaneKey(group.key);
-            const isCollapsed = collapsedSwimlanes.has(groupKey);
+          {/* Swimlanes */}
+          <div className="board-swimlanes-content">
+            {swimlaneGroups.map((group) => {
+              const groupKey = normalizeSwimlaneKey(group.key);
+              const isCollapsed = collapsedSwimlanes.has(groupKey);
 
-            return (
-              <SwimlaneRow
-                key={groupKey}
-                swimlaneKey={groupKey}
-                displayName={group.displayName}
-                tasks={group.tasks}
-                columns={columns}
-                isCollapsed={isCollapsed}
-                onToggleCollapse={() => toggleSwimlaneCollapse(groupKey)}
-              />
-            );
-          })}
+              return (
+                <SwimlaneRow
+                  key={groupKey}
+                  swimlaneKey={groupKey}
+                  displayName={group.displayName}
+                  tasks={group.tasks}
+                  columns={columns}
+                  isCollapsed={isCollapsed}
+                  onToggleCollapse={() => toggleSwimlaneCollapse(groupKey)}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </DragDropContext>
