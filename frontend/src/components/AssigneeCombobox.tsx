@@ -82,12 +82,11 @@ export const AssigneeCombobox: React.FC<AssigneeComboboxProps> = ({
   };
 
   const handleBlur = () => {
-    // Delay to allow option click to register
     setTimeout(() => setIsOpen(false), 150);
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="assignee-combobox">
       <input
         ref={inputRef}
         type="text"
@@ -104,36 +103,14 @@ export const AssigneeCombobox: React.FC<AssigneeComboboxProps> = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        style={{
-          width: '100%',
-          padding: '6px 8px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          fontSize: '14px',
-          boxSizing: 'border-box',
-        }}
+        className="assignee-combobox-input"
       />
       {isOpen && filteredOptions.length > 0 && (
         <ul
           id="assignee-listbox"
           role="listbox"
           aria-label="Предлагаемые исполнители"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            background: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            maxHeight: '200px',
-            overflowY: 'auto',
-            margin: '4px 0 0',
-            padding: '4px 0',
-            listStyle: 'none',
-          }}
+          className="assignee-combobox-list"
         >
           {filteredOptions.map((option, index) => (
             <li
@@ -142,12 +119,7 @@ export const AssigneeCombobox: React.FC<AssigneeComboboxProps> = ({
               role="option"
               aria-selected={index === activeIndex}
               onMouseDown={() => commitOption(option)}
-              style={{
-                padding: '6px 12px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                background: index === activeIndex ? '#e8f0fe' : 'transparent',
-              }}
+              className={`assignee-combobox-option ${index === activeIndex ? 'assignee-combobox-option--active' : ''}`}
             >
               {option}
             </li>

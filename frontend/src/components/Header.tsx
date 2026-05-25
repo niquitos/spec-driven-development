@@ -42,7 +42,7 @@ export function Header({ onNavigate }: HeaderProps) {
   return (
     <header className="header">
       <button onClick={handlePrevDay} aria-label="Предыдущий день">
-        ←
+        &larr;
       </button>
       <button onClick={handleToday} aria-label="Сегодня">
         Сегодня
@@ -57,7 +57,7 @@ export function Header({ onNavigate }: HeaderProps) {
         <span className="date-label">{formatDate(selectedDate, 'EEEE, MMMM d')}</span>
       </div>
       <button onClick={handleNextDay} aria-label="Следующий день">
-        →
+        &rarr;
       </button>
       <button
         onClick={handleMoveToTomorrow}
