@@ -13,7 +13,7 @@ public class TaskRepository : ITaskRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<TaskEntity>> GetByDateAsync(DateTime date, string[]? assignees, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TaskEntity>> GetByDateAsync(DateTime date, string[]? assignees, string[]? swimlanes, CancellationToken cancellationToken)
     {
         var utcDate = date.Kind == DateTimeKind.Unspecified
        ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
@@ -25,6 +25,16 @@ public class TaskRepository : ITaskRepository
         if (assignees is { Length: > 0 })
         {
             query = query.Where(t => t.Assignee != null && assignees.Contains(t.Assignee));
+        }
+
+        if (swimlanes is { Length: > 0 })
+        {
+            var normalizedSwimlanes = swimlanes.Select(s => s.ToLower()).ToArray();
+            var hasUncategorized = normalizedSwimlanes.Contains("без категории");
+
+            query = query.Where(t =>
+                (t.Swimlane != null && normalizedSwimlanes.Contains(t.Swimlane.ToLower()))
+                || (t.Swimlane == null && hasUncategorized));
         }
 
         return await query
@@ -103,6 +113,20 @@ public class TaskRepository : ITaskRepository
             .Select(t => t.Assignee!)
             .Distinct()
             .OrderBy(a => a)
+            .ToArrayAsync(ct);
+    }
+
+    public async Task<string[]> GetSwimlanesAsync(DateTime date, CancellationToken ct)
+    {
+        var utcDate = date.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
+            : date.ToUniversalTime();
+
+        return await _context.Tasks
+            .Where(t => t.Date == utcDate.Date && t.Swimlane != null)
+            .GroupBy(t => t.Swimlane!.ToLower())
+            .Select(g => g.First().Swimlane!)
+            .OrderBy(s => s.ToLower() == "без категории" ? "" : s.ToLower())
             .ToArrayAsync(ct);
     }
 

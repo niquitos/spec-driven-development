@@ -41,8 +41,10 @@ public class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt).IsRequired();
             entity.Property(e => e.Assignee).HasMaxLength(100);
+            entity.Property(e => e.Swimlane).HasMaxLength(100);
 
             entity.HasIndex(e => new { e.Date, e.Status });
+            entity.HasIndex(e => new { e.Date, e.Swimlane });
         });
     }
 }

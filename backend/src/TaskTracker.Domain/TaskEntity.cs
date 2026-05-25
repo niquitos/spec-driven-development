@@ -11,4 +11,5 @@ public class TaskEntity
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string? Assignee { get; set; }
+    public string? Swimlane { get; set; }
 }

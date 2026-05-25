@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 import { TaskStatus } from '../../types/task';
 import { AssigneeCombobox } from '../AssigneeCombobox';
+import { SwimlaneCombobox } from '../SwimlaneCombobox';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -11,11 +12,12 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }: CreateTaskModalProps) {
-  const { createTask, setIsCreateModalOpen, getAssigneeList } = useTaskStore();
+  const { createTask, setIsCreateModalOpen, getAssigneeList, swimlaneList } = useTaskStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [assignee, setAssignee] = useState('');
+  const [swimlane, setSwimlane] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +27,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
       setTitle('');
       setDescription('');
       setAssignee('');
+      setSwimlane('');
       setError(null);
       setIsSubmitting(false);
     }
@@ -43,6 +46,7 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
         status: defaultStatus,
         order: 0,
         assignee: assignee || undefined,
+        swimlane: swimlane.trim() || undefined,
       });
       setIsCreateModalOpen(false);
       onClose();
@@ -114,6 +118,16 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
               options={getAssigneeList()}
               onChange={setAssignee}
               placeholder="Введите имя исполнителя"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="task-swimlane" className="form-label">Swimlane</label>
+            <SwimlaneCombobox
+              value={swimlane}
+              options={swimlaneList}
+              onChange={setSwimlane}
+              placeholder="Выберите swimlane..."
             />
           </div>
 

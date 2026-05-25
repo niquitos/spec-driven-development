@@ -198,7 +198,7 @@ public class UpdateTaskHandlerTests
             .ReturnsAsync(existingTask2);
 
         mockRepository
-            .Setup(r => r.GetByDateAsync(It.IsAny<DateTime>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByDateAsync(It.IsAny<DateTime>(), It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { existingTask, existingTask2 });
 
         mockRepository

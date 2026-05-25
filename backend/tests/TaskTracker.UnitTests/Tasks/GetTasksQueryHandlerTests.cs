@@ -28,7 +28,7 @@ public class GetTasksQueryHandlerTests
         };
 
         _repositoryMock
-            .Setup(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedTasks);
 
         // Act
@@ -36,7 +36,7 @@ public class GetTasksQueryHandlerTests
 
         // Assert
         Assert.Equal(expectedTasks, result);
-        _repositoryMock.Verify(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class GetTasksQueryHandlerTests
         // Arrange
         var date = DateTime.Today;
         _repositoryMock
-            .Setup(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByDateAsync(date, It.IsAny<string[]?>(), It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<TaskEntity>());
 
         // Act
@@ -68,7 +68,7 @@ public class GetTasksQueryHandlerTests
         };
 
         _repositoryMock
-            .Setup(r => r.GetByDateAsync(date, assignees, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByDateAsync(date, assignees, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedTasks);
 
         // Act
@@ -76,7 +76,7 @@ public class GetTasksQueryHandlerTests
 
         // Assert
         Assert.Equal(2, result.Count());
-        _repositoryMock.Verify(r => r.GetByDateAsync(date, assignees, It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetByDateAsync(date, assignees, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class GetTasksQueryHandlerTests
         };
 
         _repositoryMock
-            .Setup(r => r.GetByDateAsync(date, assignees, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByDateAsync(date, assignees, It.IsAny<string[]?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(allTasks.Where(t => t.Assignee == "Иван"));
 
         // Act

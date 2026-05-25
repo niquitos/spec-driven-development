@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 import { Task, TaskStatus, UpdateTaskDto } from '../../types/task';
 import { AssigneeCombobox } from '../AssigneeCombobox';
+import { SwimlaneCombobox } from '../SwimlaneCombobox';
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -10,12 +11,13 @@ interface EditTaskModalProps {
 }
 
 export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
-  const { updateTask, getAssigneeList } = useTaskStore();
+  const { updateTask, getAssigneeList, swimlaneList } = useTaskStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [status, setStatus] = useState<TaskStatus>(TaskStatus.New);
   const [assignee, setAssignee] = useState('');
+  const [swimlane, setSwimlane] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +28,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
       setDate(new Date(task.date).toISOString().split('T')[0]);
       setStatus(task.status);
       setAssignee(task.assignee || '');
+      setSwimlane(task.swimlane || '');
       setError(null);
       setIsSubmitting(false);
     }
@@ -45,6 +48,7 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
         date,
         status,
         assignee: assignee || undefined,
+        swimlane: swimlane.trim() || null,
       };
 
       await updateTask(task.id, updates);
@@ -131,6 +135,16 @@ export function EditTaskModal({ isOpen, onClose, task }: EditTaskModalProps) {
               options={getAssigneeList()}
               onChange={setAssignee}
               placeholder="Введите имя исполнителя"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edit-task-swimlane" className="form-label">Swimlane</label>
+            <SwimlaneCombobox
+              value={swimlane}
+              options={swimlaneList}
+              onChange={setSwimlane}
+              placeholder="Выберите swimlane..."
             />
           </div>
 

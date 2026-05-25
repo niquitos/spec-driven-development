@@ -26,9 +26,9 @@
 
 **Цель**: Добавить поле Swimlane к доменной модели и создать миграцию
 
-- [ ] T001 Добавить свойство `string? Swimlane` в `backend/src/TaskTracker.Domain/TaskEntity.cs`
-- [ ] T002 Настроить Swimlane в `backend/src/TaskTracker.Infrastructure/Persistence/AppDbContext.cs`: `Property(e => e.Swimlane).HasMaxLength(100)`, добавить индекс `IX_tasks_Date_Swimlane` на `(Date, Swimlane)`
-- [ ] T003 Создать EF Core миграцию `AddSwimlaneToTask` через `dotnet ef migrations add`
+- [x] T001 Добавить свойство `string? Swimlane` в `backend/src/TaskTracker.Domain/TaskEntity.cs`
+- [x] T002 Настроить Swimlane в `backend/src/TaskTracker.Infrastructure/Persistence/AppDbContext.cs`: `Property(e => e.Swimlane).HasMaxLength(100)`, добавить индекс `IX_tasks_Date_Swimlane` на `(Date, Swimlane)`
+- [x] T003 Создать EF Core миграцию `AddSwimlaneToTask` через `dotnet ef migrations add`
 
 **Контрольная точка**: Миграция применена, колонка Swimlane существует в БД
 
@@ -42,23 +42,23 @@
 
 ### Тесты (TDD — написать первыми)
 
-- [ ] T004 [P] Unit-тест: `GetSwimlanesQueryHandlerTests.cs` в `backend/tests/TaskTracker.UnitTests/Tasks/` — получение уникальных swimlane, case-insensitive группировка, сортировка («Без категории» не входит, алфавитный порядок)
-- [ ] T005 [P] Unit-тест: расширить `CreateTaskCommandHandlerTests.cs` — создание задачи с swimlane, без swimlane, пробельные строки → null, maxlength > 100 → ошибка
-- [ ] T006 [P] Unit-тест: расширить `UpdateTaskCommandHandlerTests.cs` — обновление swimlane, очистка swimlane (null), пробельные строки → null, maxlength > 100 → ошибка
-- [ ] T007 [P] Integration-тест: `SwimlaneEndpointTests.cs` в `backend/tests/TaskTracker.IntegrationTests/` — GET /api/tasks/swimlanes (успех, пустой результат, 400 без date), POST/PUT с swimlane, фильтрация по swimlanes
+- [x] T004 [P] Unit-тест: `GetSwimlanesQueryHandlerTests.cs` в `backend/tests/TaskTracker.UnitTests/Tasks/` — получение уникальных swimlane, case-insensitive группировка, сортировка («Без категории» не входит, алфавитный порядок)
+- [x] T005 [P] Unit-тест: расширить `CreateTaskCommandHandlerTests.cs` — создание задачи с swimlane, без swimlane, пробельные строки → null, maxlength > 100 → ошибка
+- [x] T006 [P] Unit-тест: расширить `UpdateTaskCommandHandlerTests.cs` — обновление swimlane, очистка swimlane (null), пробельные строки → null, maxlength > 100 → ошибка
+- [x] T007 [P] Integration-тест: `SwimlaneEndpointTests.cs` в `backend/tests/TaskTracker.IntegrationTests/` — GET /api/tasks/swimlanes (успех, пустой результат, 400 без date), POST/PUT с swimlane, фильтрация по swimlanes
 
 ### Реализация
 
-- [ ] T008 Создать `GetSwimlanesQuery.cs` в `backend/src/TaskTracker.Application/Tasks/` — query record, handler с `.GroupBy(t => t.Swimlane!.ToLower()).Select(g => g.First().Swimlane!).OrderBy(...)`, validator
-- [ ] T009 Добавить `Task<string[]> GetSwimlanesAsync(CancellationToken ct)` в `backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs`
-- [ ] T010 Реализовать `GetSwimlanesAsync` в `backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs` — case-insensitive группировка, сортировка («без категории» не входит в список)
-- [ ] T011 Расширить `CreateTaskCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — добавить `string? Swimlane = null`, валидация maxlength 100, null-нормализация в handler
-- [ ] T012 Расширить `UpdateTaskCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — добавить `string? Swimlane = null`, валидация maxlength 100, null-нормализация в handler
-- [ ] T013 Расширить `GetTasksQuery.cs` handler в `backend/src/TaskTracker.Application/Tasks/` — поддержка параметра `swimlanes` для фильтрации (case-insensitive, комбинирование с assignees через AND)
-- [ ] T014 Расширить `TaskRepository.cs` — добавить параметр `swimlanes` в `GetByDateAsync`, фильтрация `.Where(t => swimlanes.Contains(t.Swimlane.ToLower()))`
-- [ ] T015 Добавить `GET /api/tasks/swimlanes?date=` в `backend/src/TaskTracker.Api/Controllers/TasksController.cs` — инжекция `IRequestHandler<GetSwimlanesQuery, string[]>`
-- [ ] T016 Расширить `GET /api/tasks` в `TasksController.cs` — параметр `swimlanes` (comma-separated)
-- [ ] T017 Расширить `CreateTaskRequest` и `UpdateTaskRequest` в `TasksController.cs` — добавить `string? Swimlane`
+- [x] T008 Создать `GetSwimlanesQuery.cs` в `backend/src/TaskTracker.Application/Tasks/` — query record, handler с `.GroupBy(t => t.Swimlane!.ToLower()).Select(g => g.First().Swimlane!).OrderBy(...)`, validator
+- [x] T009 Добавить `Task<string[]> GetSwimlanesAsync(CancellationToken ct)` в `backend/src/TaskTracker.Application/Tasks/ITaskRepository.cs`
+- [x] T010 Реализовать `GetSwimlanesAsync` в `backend/src/TaskTracker.Infrastructure/Persistence/TaskRepository.cs` — case-insensitive группировка, сортировка («без категории» не входит в список)
+- [x] T011 Расширить `CreateTaskCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — добавить `string? Swimlane = null`, валидация maxlength 100, null-нормализация в handler
+- [x] T012 Расширить `UpdateTaskCommand.cs` в `backend/src/TaskTracker.Application/Tasks/` — добавить `string? Swimlane = null`, валидация maxlength 100, null-нормализация в handler
+- [x] T013 Расширить `GetTasksQuery.cs` handler в `backend/src/TaskTracker.Application/Tasks/` — поддержка параметра `swimlanes` для фильтрации (case-insensitive, комбинирование с assignees через AND)
+- [x] T014 Расширить `TaskRepository.cs` — добавить параметр `swimlanes` в `GetByDateAsync`, фильтрация `.Where(t => swimlanes.Contains(t.Swimlane.ToLower()))`
+- [x] T015 Добавить `GET /api/tasks/swimlanes?date=` в `backend/src/TaskTracker.Api/Controllers/TasksController.cs` — инжекция `IRequestHandler<GetSwimlanesQuery, string[]>`
+- [x] T016 Расширить `GET /api/tasks` в `TasksController.cs` — параметр `swimlanes` (comma-separated)
+- [x] T017 Расширить `CreateTaskRequest` и `UpdateTaskRequest` в `TasksController.cs` — добавить `string? Swimlane`
 
 **Контрольная точка**: `dotnet test` проходит, Swagger показывает поле swimlane во всех endpoints
 
@@ -77,15 +77,15 @@
 
 ### Реализация US1
 
-- [ ] T020 [P] [US1] Добавить `swimlane: string | null` в `frontend/src/types/task.ts` (Task, CreateTaskDto, UpdateTaskDto)
-- [ ] T021 [P] [US1] Создать `frontend/src/utils/swimlane.ts` — `normalizeSwimlaneKey()`, `DEFAULT_SWIMLANE_KEY`, `DEFAULT_SWIMLANE_DISPLAY`, `groupBySwimlane()`
-- [ ] T022 [P] [US1] Добавить `getSwimlanes(date: string)` в `frontend/src/services/taskApi.ts`, расширить `getTasks` параметром `swimlanes`
-- [ ] T023 [US1] Расширить `frontend/src/stores/taskStore.ts` — добавить `swimlaneList: string[]`, `loadSwimlaneList()`, вызов `loadSwimlaneList` после мутаций (create, update, delete, move)
-- [ ] T024 [US1] Создать `frontend/src/components/SwimlaneRow.tsx` — горизонтальная полоса с тремя Column-компонентами (New, InProgress, Done), пустые ячейки как Droppable-области, каждая ячейка с droppableId `{normalizeSwimlaneKey(swimlane)}:{TaskStatus}`
-- [ ] T025 [US1] Создать `frontend/src/components/SwimlaneHeader.tsx` — заголовок swimlane с названием (displayName), количеством задач (общее по всем колонкам), и placeholder для collapse toggle
-- [ ] T026 [US1] Рефакторинг `frontend/src/components/Board.tsx` — заменить прямую отрисовку Column на группировку по swimlane: загрузка swimlaneList, группировка задач через `groupBySwimlane()`, отрисовка SwimlaneRow для каждой группы (сначала «Без категории», потом по алфавиту)
-- [ ] T027 [US1] Адаптировать `frontend/src/components/Column.tsx` — принимать `swimlaneKey` как prop, формировать droppableId как `{swimlaneKey}:{status}`
-- [ ] T028 [US1] Адаптировать `frontend/src/components/TaskCard.tsx` — передавать `swimlaneKey` в drag data для обновления swimlane при DnD (подготовка для US4)
+- [x] T020 [P] [US1] Добавить `swimlane: string | null` в `frontend/src/types/task.ts` (Task, CreateTaskDto, UpdateTaskDto)
+- [x] T021 [P] [US1] Создать `frontend/src/utils/swimlane.ts` — `normalizeSwimlaneKey()`, `DEFAULT_SWIMLANE_KEY`, `DEFAULT_SWIMLANE_DISPLAY`, `groupBySwimlane()`
+- [x] T022 [P] [US1] Добавить `getSwimlanes(date: string)` в `frontend/src/services/taskApi.ts`, расширить `getTasks` параметром `swimlanes`
+- [x] T023 [US1] Расширить `frontend/src/stores/taskStore.ts` — добавить `swimlaneList: string[]`, `loadSwimlaneList()`, вызов `loadSwimlaneList` после мутаций (create, update, delete, move)
+- [x] T024 [US1] Создать `frontend/src/components/SwimlaneRow.tsx` — горизонтальная полоса с тремя Column-компонентами (New, InProgress, Done), пустые ячейки как Droppable-области, каждая ячейка с droppableId `{normalizeSwimlaneKey(swimlane)}:{TaskStatus}`
+- [x] T025 [US1] Создать `frontend/src/components/SwimlaneHeader.tsx` — заголовок swimlane с названием (displayName), количеством задач (общее по всем колонкам), и placeholder для collapse toggle
+- [x] T026 [US1] Рефакторинг `frontend/src/components/Board.tsx` — заменить прямую отрисовку Column на группировку по swimlane: загрузка swimlaneList, группировка задач через `groupBySwimlane()`, отрисовка SwimlaneRow для каждой группы (сначала «Без категории», потом по алфавиту)
+- [x] T027 [US1] Адаптировать `frontend/src/components/Column.csx` — принимать `swimlaneKey` как prop, формировать droppableId как `{swimlaneKey}:{status}` (реализовано через SwimlaneRow)
+- [x] T028 [US1] Адаптировать `frontend/src/components/TaskCard.tsx` — передавать `swimlaneKey` в drag data для обновления swimlane при DnD (подготовка для US4) (реализовано через составной droppableId в Board.tsx)
 
 **Контрольная точка**: Доска отображает задачи по swimlane, «Без категории» первый, остальные по алфавиту, пустые ячейки видны
 
@@ -103,11 +103,11 @@
 
 ### Реализация US2
 
-- [ ] T030 [US2] Создать `frontend/src/hooks/useSwimlaneCollapse.ts` — хук для управления collapsedSwimlanes (Set<string> нормализованных ключей), чтение/запись localStorage по ключу `tasktracker_collapsed_swimlanes`, функции `isCollapsed(key)`, `toggle(key)`, `collapseAll()`, `expandAll()`
-- [ ] T031 [US2] Расширить `frontend/src/stores/taskStore.ts` — добавить `collapsedSwimlanes: Set<string>`, `toggleSwimlaneCollapse(swimlaneKey: string)`, интеграция с `useSwimlaneCollapse`
-- [ ] T032 [US2] Обновить `frontend/src/components/SwimlaneHeader.tsx` — добавить кнопку сворачивания с ARIA-атрибутами (`role="button"`, `aria-expanded`, `aria-controls`, `aria-label`), обработка `Enter`/`Space` для клавиатурной навигации
-- [ ] T033 [US2] Обновить `frontend/src/components/SwimlaneRow.tsx` — условный рендеринг: развёрнутый (задачи видны) или свёрнутый (только SwimlaneHeader с количеством задач), скрытые задачи с `aria-hidden="true"`
-- [ ] T034 [US2] Добавить стили сворачивания/разворачивания в `frontend/src/index.css` — анимация CSS transition на `max-height` и `opacity` (200мс), медиа-запрос `prefers-reduced-motion: reduce` для мгновенного переключения
+- [x] T030 [US2] Создать `frontend/src/hooks/useSwimlaneCollapse.ts` — хук для управления collapsedSwimlanes (Set<string> нормализованных ключей), чтение/запись localStorage по ключу `tasktracker_collapsed_swimlanes`, функции `isCollapsed(key)`, `toggle(key)`, `collapseAll()`, `expandAll()`
+- [x] T031 [US2] Расширить `frontend/src/stores/taskStore.ts` — добавить `collapsedSwimlanes: Set<string>`, `toggleSwimlaneCollapse(swimlaneKey: string)`, интеграция с `useSwimlaneCollapse`
+- [x] T032 [US2] Обновить `frontend/src/components/SwimlaneHeader.tsx` — добавить кнопку сворачивания с ARIA-атрибутами (`role="button"`, `aria-expanded`, `aria-controls`, `aria-label`), обработка `Enter`/`Space` для клавиатурной навигации
+- [x] T033 [US2] Обновить `frontend/src/components/SwimlaneRow.tsx` — условный рендеринг: развёрнутый (задачи видны) или свёрнутый (только SwimlaneHeader с количеством задач), скрытые задачи с `aria-hidden="true"`
+- [x] T034 [US2] Добавить стили сворачивания/разворачивания в `frontend/src/index.css` — анимация CSS transition на `max-height` и `opacity` (200мс), медиа-запрос `prefers-reduced-motion: reduce` для мгновенного переключения
 
 **Контрольная точка**: Swimlane сворачивается/разворачивается, состояние сохраняется в localStorage, ARIA-атрибуты работают
 
@@ -125,10 +125,10 @@
 
 ### Реализация US3
 
-- [ ] T036 [US3] Создать `frontend/src/components/SwimlaneCombobox.tsx` — автодополнение по аналогии с AssigneeCombobox: props `value`, `options: string[]`, `onChange`, `placeholder="Выберите swimlane..."`, ARIA-атрибуты (`role="combobox"`, `aria-expanded`, `aria-controls="swimlane-listbox"`), case-insensitive substring фильтрация через `.toLowerCase()`, maxlength 100, free-text ввод
-- [ ] T037 [US3] Расширить `frontend/src/components/TaskModal/CreateTaskModal.tsx` — добавить SwimlaneCombobox с `value=""` (по умолчанию), `options={swimlaneList}`, `onChange={handleSwimlaneChange}`
-- [ ] T038 [US3] Расширить `frontend/src/components/TaskModal/EditTaskModal.tsx` — добавить SwimlaneCombobox с `value={task.swimlane ?? ""}`, `options={swimlaneList}`, `onChange={handleSwimlaneChange}`, возможность очистить (null → «Без категории»)
-- [ ] T039 [US3] Обновить `frontend/src/stores/taskStore.ts` — расширить `createTask` и `updateTask` для передачи поля `swimlane`, вызов `loadSwimlaneList()` после мутаций (обновление списка swimlane)
+- [x] T036 [US3] Создать `frontend/src/components/SwimlaneCombobox.tsx` — автодополнение по аналогии с AssigneeCombobox: props `value`, `options: string[]`, `onChange`, `placeholder="Выберите swimlane..."`, ARIA-атрибуты (`role="combobox"`, `aria-expanded`, `aria-controls="swimlane-listbox"`), case-insensitive substring фильтрация через `.toLowerCase()`, maxlength 100, free-text ввод
+- [x] T037 [US3] Расширить `frontend/src/components/TaskModal/CreateTaskModal.tsx` — добавить SwimlaneCombobox с `value=""` (по умолчанию), `options={swimlaneList}`, `onChange={handleSwimlaneChange}`
+- [x] T038 [US3] Расширить `frontend/src/components/TaskModal/EditTaskModal.tsx` — добавить SwimlaneCombobox с `value={task.swimlane ?? ""}`, `options={swimlaneList}`, `onChange={handleSwimlaneChange}`, возможность очистить (null → «Без категории»)
+- [x] T039 [US3] Обновить `frontend/src/stores/taskStore.ts` — расширить `createTask` и `updateTask` для передачи поля `swimlane`, вызов `loadSwimlaneList()` после мутаций (обновление списка swimlane)
 
 **Контрольная точка**: Поле swimlane с автодополнением работает в CreateTaskModal и EditTaskModal, новые swimlane создаются автоматически
 
@@ -147,10 +147,10 @@
 
 ### Реализация US4
 
-- [ ] T042 [US4] Обновить drag-and-drop handler в `frontend/src/components/Board.tsx` — парсинг составного droppableId `{swimlaneKey}:{status}`, определение нового swimlaneKey и status из destination, обработка «без категории» → null
-- [ ] T043 [US4] Обновить `frontend/src/stores/taskStore.ts` — расширить `moveTask` для обновления swimlane при вертикальном перемещении: если `swimlaneKey` изменился → отправить `updateTask({ swimlane: displayName })`, если `swimlaneKey === DEFAULT_SWIMLANE_KEY` → отправить `swimlane: null`
-- [ ] T044 [US4] Обновить `frontend/src/components/SwimlaneRow.tsx` — свёрнутый swimlane принимает drag-and-drop (задача добавляется, swimlane не разворачивается, счётчик обновляется), пустые ячейки — Droppable-области
-- [ ] T045 [US4] Реализовать optimistic update для drag-and-drop: задача мгновенно перемещается в целевой swimlane, при ошибке API — откат (rollback), исходный swimlane восстанавливается
+- [x] T042 [US4] Обновить drag-and-drop handler в `frontend/src/components/Board.tsx` — парсинг составного droppableId `{swimlaneKey}:{status}`, определение нового swimlaneKey и status из destination, обработка «без категории» → null
+- [x] T043 [US4] Обновить `frontend/src/stores/taskStore.ts` — расширить `moveTask` для обновления swimlane при вертикальном перемещении: если `swimlaneKey` изменился → отправить `updateTask({ swimlane: displayName })`, если `swimlaneKey === DEFAULT_SWIMLANE_KEY` → отправить `swimlane: null`
+- [x] T044 [US4] Обновить `frontend/src/components/SwimlaneRow.tsx` — свёрнутый swimlane принимает drag-and-drop (задача добавляется, swimlane не разворачивается, счётчик обновляется), пустые ячейки — Droppable-области
+- [x] T045 [US4] Реализовать optimistic update для drag-and-drop: задача мгновенно перемещается в целевой swimlane, при ошибке API — откат (rollback), исходный swimlane восстанавливается
 
 **Контрольная точка**: Drag-and-drop работает в обоих направлениях, поле swimlane обновляется, optimistic update корректен
 
