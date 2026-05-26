@@ -30,16 +30,14 @@ export function groupBySwimlane(tasks: Task[]): SwimlaneGroup[] {
 
   const groups: SwimlaneGroup[] = [];
 
-  // "Без категории" comes first
-  const defaultGroup = map.get(DEFAULT_SWIMLANE_KEY);
-  if (defaultGroup) {
-    groups.push({
-      key: DEFAULT_SWIMLANE_KEY,
-      displayName: DEFAULT_SWIMLANE_DISPLAY,
-      tasks: defaultGroup,
-    });
-    map.delete(DEFAULT_SWIMLANE_KEY);
-  }
+  // "Без категории" always comes first, even if empty
+  const defaultGroup = map.get(DEFAULT_SWIMLANE_KEY) ?? [];
+  groups.push({
+    key: DEFAULT_SWIMLANE_KEY,
+    displayName: DEFAULT_SWIMLANE_DISPLAY,
+    tasks: defaultGroup,
+  });
+  map.delete(DEFAULT_SWIMLANE_KEY);
 
   // Remaining groups sorted alphabetically by key
   const remaining = Array.from(map.entries()).sort(([a], [b]) =>

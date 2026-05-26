@@ -5,6 +5,7 @@ import { TaskCard } from './TaskCard';
 import { useTaskStore } from '../stores/taskStore';
 import { useState } from 'react';
 import { CreateTaskModal } from './TaskModal/CreateTaskModal';
+import { DEFAULT_SWIMLANE_KEY } from '../utils/swimlane';
 
 interface SwimlaneRowProps {
   swimlaneKey: string;
@@ -18,12 +19,20 @@ interface SwimlaneRowProps {
 export function SwimlaneRow({ swimlaneKey, displayName, tasks, columns, isCollapsed, onToggleCollapse }: SwimlaneRowProps) {
   const { selectedDate } = useTaskStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createStatus, setCreateStatus] = useState<TaskStatus>(TaskStatus.New);
 
   const taskCount = tasks.length;
   const contentId = `swimlane-content-${swimlaneKey}`;
 
   const tasksByStatus = (status: TaskStatus) =>
     tasks.filter(t => t.status === status).sort((a, b) => a.order - b.order);
+
+  const openCreateModal = (status: TaskStatus) => {
+    setCreateStatus(status);
+    setIsCreateModalOpen(true);
+  };
+
+  const defaultSwimlane = swimlaneKey === DEFAULT_SWIMLANE_KEY ? '' : displayName;
 
   return (
     <div className="swimlane-row" data-swimlane={swimlaneKey}>
@@ -43,6 +52,16 @@ export function SwimlaneRow({ swimlaneKey, displayName, tasks, columns, isCollap
 
               return (
                 <div className="swimlane-cell" key={column.status}>
+                  <div className="swimlane-cell-header">
+                    <span className="swimlane-cell-count">{columnTasks.length}</span>
+                    <button
+                      className="swimlane-add-btn"
+                      onClick={() => openCreateModal(column.status)}
+                      aria-label={`Добавить задачу в колонку "${column.title}"`}
+                    >
+                      +
+                    </button>
+                  </div>
                   <Droppable droppableId={droppableId}>
                     {(provided, snapshot) => (
                       <div
@@ -66,7 +85,7 @@ export function SwimlaneRow({ swimlaneKey, displayName, tasks, columns, isCollap
       {isCollapsed && (
         <div
           className="swimlane-collapsed-drop-zone"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => openCreateModal(TaskStatus.New)}
         >
           <Droppable droppableId={`${swimlaneKey}:${TaskStatus.New}`}>
             {(provided) => (
@@ -85,7 +104,8 @@ export function SwimlaneRow({ swimlaneKey, displayName, tasks, columns, isCollap
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         defaultDate={selectedDate}
-        defaultStatus={TaskStatus.New}
+        defaultStatus={createStatus}
+        defaultSwimlane={defaultSwimlane}
       />
     </div>
   );

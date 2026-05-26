@@ -9,9 +9,10 @@ interface CreateTaskModalProps {
   onClose: () => void;
   defaultDate: Date;
   defaultStatus: TaskStatus;
+  defaultSwimlane?: string;
 }
 
-export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }: CreateTaskModalProps) {
+export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus, defaultSwimlane }: CreateTaskModalProps) {
   const { createTask, setIsCreateModalOpen, getAssigneeList, swimlaneList } = useTaskStore();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -27,11 +28,11 @@ export function CreateTaskModal({ isOpen, onClose, defaultDate, defaultStatus }:
       setTitle('');
       setDescription('');
       setAssignee('');
-      setSwimlane('');
+      setSwimlane(defaultSwimlane ?? '');
       setError(null);
       setIsSubmitting(false);
     }
-  }, [isOpen, defaultDate]);
+  }, [isOpen, defaultDate, defaultSwimlane]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
