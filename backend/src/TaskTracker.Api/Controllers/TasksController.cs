@@ -18,7 +18,7 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
-    private readonly IRequestHandler<MoveIncompleteToTomorrowCommand, MoveIncompleteToTomorrowResponse> _moveIncompleteToTomorrowHandler;
+    private readonly IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> _moveIncompleteToDateHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
 
     public TasksController(
@@ -31,7 +31,7 @@ public class TasksController : ControllerBase
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
-        IRequestHandler<MoveIncompleteToTomorrowCommand, MoveIncompleteToTomorrowResponse> moveIncompleteToTomorrowHandler,
+        IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> moveIncompleteToDateHandler,
         IValidator<CreateTaskCommand> validator)
     {
         _getTasksHandler = getTasksHandler;
@@ -43,7 +43,7 @@ public class TasksController : ControllerBase
         _deleteHandler = deleteHandler;
         _bulkDeleteHandler = bulkDeleteHandler;
         _bulkMoveHandler = bulkMoveHandler;
-        _moveIncompleteToTomorrowHandler = moveIncompleteToTomorrowHandler;
+        _moveIncompleteToDateHandler = moveIncompleteToDateHandler;
         _validator = validator;
     }
 
@@ -156,11 +156,11 @@ public class TasksController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("bulk/move-incomplete-to-tomorrow")]
-    public async Task<ActionResult<MoveIncompleteToTomorrowResponse>> MoveIncompleteToTomorrow()
+    [HttpPost("bulk/move-incomplete")]
+    public async Task<ActionResult<MoveIncompleteToDateResponse>> MoveIncompleteToDate([FromBody] MoveIncompleteToDateRequest request)
     {
-        var command = new MoveIncompleteToTomorrowCommand();
-        var result = await _moveIncompleteToTomorrowHandler.Handle(command, CancellationToken.None);
+        var command = new MoveIncompleteToDateCommand(request.TargetDate);
+        var result = await _moveIncompleteToDateHandler.Handle(command, CancellationToken.None);
         return Ok(result);
     }
 }
@@ -191,5 +191,9 @@ public record BulkDeleteRequest(
 
 public record BulkMoveRequest(
     IList<int> TaskIds,
+    DateTime TargetDate
+);
+
+public record MoveIncompleteToDateRequest(
     DateTime TargetDate
 );

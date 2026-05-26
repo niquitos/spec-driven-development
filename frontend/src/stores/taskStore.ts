@@ -94,8 +94,8 @@ interface TaskState {
   setEditingTask: (task: Task | null) => void;
   bulkDelete: () => Promise<void>;
   bulkMove: (targetDate: Date) => Promise<void>;
-  isMovingToTomorrow: boolean;
-  moveIncompleteToTomorrow: () => Promise<void>;
+  isMovingIncomplete: boolean;
+  moveIncompleteToDate: (targetDate: Date) => Promise<void>;
   setAssigneeFilter: (assignees: string[]) => void;
   getAssigneeList: () => string[];
 }
@@ -112,7 +112,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   assigneeList: [],
   swimlaneList: [],
   collapsedSwimlanes: loadCollapsedSwimlanes(),
-  isMovingToTomorrow: false,
+  isMovingIncomplete: false,
 
   setTasks: (tasks) => set({ tasks }),
 
@@ -123,6 +123,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const dateStr = date.toISOString().split('T')[0];
       const tasks = await taskApi.getTasks(dateStr, state.assigneeFilter.length > 0 ? state.assigneeFilter : undefined);
       set({ tasks, isLoading: false });
+      if (tasks.length === 0 && state.assigneeFilter.length === 0) {
+        addToast('Нет задач на эту дату', 'info');
+      }
       get().loadAssigneeList();
       get().loadSwimlaneList();
     } catch (error) {
@@ -376,21 +379,22 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 
-  moveIncompleteToTomorrow: async () => {
-    set({ isMovingToTomorrow: true });
+  moveIncompleteToDate: async (targetDate: Date) => {
+    set({ isMovingIncomplete: true });
     try {
-      const result = await taskApi.moveIncompleteToTomorrow();
+      const dateStr = targetDate.toISOString().split('T')[0];
+      const result = await taskApi.moveIncompleteToDate(dateStr);
       if (result.moved > 0) {
         const count = result.moved;
-        addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'} на завтра`);
+        addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
         await get().loadTasks(get().selectedDate);
       } else {
         addToast('Нет задач для переноса', 'info');
       }
     } catch {
-      addToast('Ошибка при переносе задач на завтра', 'error');
+      addToast('Ошибка при переносе задач', 'error');
     } finally {
-      set({ isMovingToTomorrow: false });
+      set({ isMovingIncomplete: false });
     }
   },
 

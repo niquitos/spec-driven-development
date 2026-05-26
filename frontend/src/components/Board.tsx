@@ -117,27 +117,16 @@ export function Board() {
             <p>Нет задач, соответствующих фильтру</p>
           </div>
         )}
-        {swimlaneGroups.length === 0 && dateTasks.length === 0 && (
-          <div className="empty-state">
-            <p>Нет задач на эту дату</p>
-          </div>
-        )}
         <div className="board board--swimlanes">
-          {/* Фон столбцов — непрерывные полосы */}
+          {/* Фон столбцов — непрерывные полосы во всю высоту */}
           <div className="board-columns-bg" aria-hidden="true">
             {columns.map((column) => (
-              <div key={column.status} className="board-column-bg"></div>
-            ))}
-          </div>
-          {/* Заголовки столбцов */}
-          <div className="board-columns-header">
-            {columns.map((column) => (
-              <div key={column.status} className="board-column-header">
-                {column.title}
+              <div key={column.status} className="board-column-bg">
+                <div className="board-column-bg-header">{column.title}</div>
               </div>
             ))}
           </div>
-          {/* Swimlanes */}
+          {/* Swimlanes поверх столбцов */}
           <div className="board-swimlanes-content">
             {swimlaneGroups.map((group) => {
               const groupKey = normalizeSwimlaneKey(group.key);

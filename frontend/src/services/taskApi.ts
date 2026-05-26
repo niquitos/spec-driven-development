@@ -46,8 +46,8 @@ export const taskApi = {
     return response.data;
   },
 
-  async moveIncompleteToTomorrow(): Promise<{ moved: number; targetDate: string }> {
-    const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move-incomplete-to-tomorrow');
+  async moveIncompleteToDate(targetDate: string): Promise<{ moved: number; targetDate: string }> {
+    const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move-incomplete', { targetDate });
     return response.data;
   },
 

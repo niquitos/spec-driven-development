@@ -12,5 +12,5 @@ public interface ITaskRepository
     Task<IEnumerable<TaskEntity>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
     Task<string[]> GetAssigneesAsync(CancellationToken ct);
     Task<string[]> GetSwimlanesAsync(DateTime date, CancellationToken ct);
-    Task<int> MoveIncompleteToTomorrowAsync(DateTime tomorrow, CancellationToken cancellationToken);
+    Task<int> MoveIncompleteToDateAsync(DateTime targetDate, CancellationToken cancellationToken);
 }
