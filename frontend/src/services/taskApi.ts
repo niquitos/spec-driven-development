@@ -6,10 +6,13 @@ const api = axios.create({
 });
 
 export const taskApi = {
-  async getTasks(date: string, assignees?: string[]): Promise<Task[]> {
+  async getTasks(date: string, assignees?: string[], swimlanes?: string[]): Promise<Task[]> {
     const params: Record<string, string> = { date };
     if (assignees && assignees.length > 0) {
       params.assignees = assignees.join(',');
+    }
+    if (swimlanes && swimlanes.length > 0) {
+      params.swimlanes = swimlanes.join(',');
     }
     const response = await api.get<Task[]>('/tasks', { params });
     return response.data;
@@ -40,6 +43,16 @@ export const taskApi = {
 
   async getAssignees(): Promise<string[]> {
     const response = await api.get<string[]>('/tasks/assignees');
+    return response.data;
+  },
+
+  async moveIncompleteToDate(targetDate: string): Promise<{ moved: number; targetDate: string }> {
+    const response = await api.post<{ moved: number; targetDate: string }>('/tasks/bulk/move-incomplete', { targetDate });
+    return response.data;
+  },
+
+  async getSwimlanes(date: string): Promise<string[]> {
+    const response = await api.get<string[]>('/tasks/swimlanes', { params: { date } });
     return response.data;
   },
 };

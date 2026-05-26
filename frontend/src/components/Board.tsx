@@ -1,9 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { useTaskStore } from '../stores/taskStore';
-import { Column } from './Column';
+import { SwimlaneRow } from './SwimlaneRow';
 import { BulkActionsPanel } from './BulkActions/BulkActionsPanel';
 import { TaskStatus } from '../types/task';
+import { groupBySwimlane, normalizeSwimlaneKey, DEFAULT_SWIMLANE_KEY } from '../utils/swimlane';
 
 const columns: { status: TaskStatus; title: string }[] = [
   { status: TaskStatus.New, title: 'Новые' },
@@ -12,9 +13,20 @@ const columns: { status: TaskStatus; title: string }[] = [
 ];
 
 export function Board() {
-  const { tasks, selectedDate, loadTasks, setSelectedDate, moveTask, isLoading, error, assigneeFilter } = useTaskStore();
+  const {
+    tasks,
+    selectedDate,
+    loadTasks,
+    setSelectedDate,
+    moveTask,
+    updateTask,
+    isLoading,
+    error,
+    assigneeFilter,
+    collapsedSwimlanes,
+    toggleSwimlaneCollapse,
+  } = useTaskStore();
 
-  // Загружаем задачи при изменении даты
   useEffect(() => {
     loadTasks(selectedDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,15 +57,34 @@ export function Board() {
     if (!result.destination) return;
 
     const taskId = Number(result.draggableId);
-    const newStatus = Number(result.destination.droppableId) as TaskStatus;
+    const destDroppableId = result.destination.droppableId;
+
+    // Parse composite droppableId: "{swimlaneKey}:{TaskStatus}"
+    const [destSwimlaneKey, destStatusStr] = destDroppableId.split(':');
+    const newStatus = Number(destStatusStr) as TaskStatus;
     const newOrder = result.destination.index;
 
-    moveTask(taskId, newStatus, newOrder);
+    // Source droppableId
+    const sourceDroppableId = result.source.droppableId;
+    const [sourceSwimlaneKey] = sourceDroppableId.split(':');
+
+    // Determine if swimlane changed
+    if (sourceSwimlaneKey !== destSwimlaneKey) {
+      // Vertical move: update swimlane + status + order in single call
+      const newSwimlane = destSwimlaneKey === DEFAULT_SWIMLANE_KEY ? null : destSwimlaneKey;
+      updateTask(taskId, { swimlane: newSwimlane, status: newStatus, order: newOrder });
+    } else {
+      // Only status/order changed
+      moveTask(taskId, newStatus, newOrder);
+    }
   };
 
-  const dateTasks = tasks.filter(
-    (task) => new Date(task.date).toDateString() === selectedDate.toDateString()
+  const dateTasks = useMemo(
+    () => tasks.filter((task) => new Date(task.date).toDateString() === selectedDate.toDateString()),
+    [tasks, selectedDate]
   );
+
+  const swimlaneGroups = useMemo(() => groupBySwimlane(dateTasks), [dateTasks]);
 
   if (isLoading) {
     return (
@@ -86,15 +117,34 @@ export function Board() {
             <p>Нет задач, соответствующих фильтру</p>
           </div>
         )}
-        <div className="board">
-          {columns.map((column) => (
-            <Column
-              key={column.status}
-              status={column.status}
-              title={column.title}
-              tasks={dateTasks.filter((t) => t.status === column.status)}
-            />
-          ))}
+        <div className="board board--swimlanes">
+          {/* Фон столбцов — непрерывные полосы во всю высоту */}
+          <div className="board-columns-bg" aria-hidden="true">
+            {columns.map((column) => (
+              <div key={column.status} className="board-column-bg">
+                <div className="board-column-bg-header">{column.title}</div>
+              </div>
+            ))}
+          </div>
+          {/* Swimlanes поверх столбцов */}
+          <div className="board-swimlanes-content">
+            {swimlaneGroups.map((group) => {
+              const groupKey = normalizeSwimlaneKey(group.key);
+              const isCollapsed = collapsedSwimlanes.has(groupKey);
+
+              return (
+                <SwimlaneRow
+                  key={groupKey}
+                  swimlaneKey={groupKey}
+                  displayName={group.displayName}
+                  tasks={group.tasks}
+                  columns={columns}
+                  isCollapsed={isCollapsed}
+                  onToggleCollapse={() => toggleSwimlaneCollapse(groupKey)}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </DragDropContext>

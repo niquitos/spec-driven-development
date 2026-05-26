@@ -14,6 +14,7 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   assignee: string | null;
+  swimlane: string | null;
 }
 
 export interface CreateTaskDto {
@@ -23,6 +24,7 @@ export interface CreateTaskDto {
   status: TaskStatus;
   order?: number;
   assignee?: string;
+  swimlane?: string;
 }
 
 export interface UpdateTaskDto {
@@ -32,4 +34,5 @@ export interface UpdateTaskDto {
   status?: TaskStatus;
   order?: number;
   assignee?: string;
+  swimlane?: string | null;
 }

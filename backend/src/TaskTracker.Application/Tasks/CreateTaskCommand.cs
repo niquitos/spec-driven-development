@@ -9,7 +9,8 @@ public record CreateTaskCommand(
     DateTime Date,
     Domain.TaskStatus Status,
     int Order,
-    string? Assignee = null
+    string? Assignee = null,
+    string? Swimlane = null
 ) : IRequest<TaskEntity>;
 
 public class CreateTaskCommandValidator : IValidator<CreateTaskCommand>
@@ -37,6 +38,11 @@ public class CreateTaskCommandValidator : IValidator<CreateTaskCommand>
             errors.Add("Assignee must not exceed 100 characters");
         }
 
+        if (request.Swimlane?.Length > 100)
+        {
+            errors.Add("Swimlane must be at most 100 characters long.");
+        }
+
         return errors;
     }
 }
@@ -62,6 +68,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskE
             Status = request.Status,
             Order = request.Order,
             Assignee = string.IsNullOrWhiteSpace(request.Assignee) ? null : request.Assignee,
+            Swimlane = string.IsNullOrWhiteSpace(request.Swimlane) ? null : request.Swimlane,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

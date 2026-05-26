@@ -9,7 +9,8 @@ public record UpdateTaskCommand(
     DateTime Date,
     Domain.TaskStatus Status,
     int Order,
-    string? Assignee = null
+    string? Assignee = null,
+    string? Swimlane = null
 ) : IRequest;
 
 public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
@@ -34,6 +35,7 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
 
         var oldAssignee = task.Assignee;
         var newAssignee = string.IsNullOrWhiteSpace(request.Assignee) ? null : request.Assignee;
+        var newSwimlane = string.IsNullOrWhiteSpace(request.Swimlane) ? null : request.Swimlane;
 
         // Если статус или порядок изменились - пересчитываем order для всех задач в этой колонке
         if (task.Status != request.Status || task.Order != request.Order)
@@ -46,6 +48,7 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
         task.Date = request.Date.Date;
         task.Status = request.Status;
         task.Assignee = newAssignee;
+        task.Swimlane = newSwimlane;
         task.UpdatedAt = DateTime.UtcNow;
 
         if (oldAssignee != newAssignee)
@@ -61,7 +64,7 @@ public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
     private async Task RecalculateOrders(int taskId, Domain.TaskStatus status, DateTime date, int newOrder, CancellationToken cancellationToken)
     {
         // Получаем все задачи по этой дате
-        var allTasks = await _repository.GetByDateAsync(date, null, cancellationToken);
+        var allTasks = await _repository.GetByDateAsync(date, null, null, cancellationToken);
         var tasksInColumn = allTasks.Where(t => t.Status == status).ToList();
 
         // Находим перемещаемую задачу

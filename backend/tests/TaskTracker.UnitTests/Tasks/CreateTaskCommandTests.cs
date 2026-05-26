@@ -169,4 +169,88 @@ public class CreateTaskCommandValidatorTests
         // Assert
         Assert.Empty(errors);
     }
+
+    [Fact]
+    public async Task Validate_WhenSwimlaneIsNull_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            null,
+            null
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenSwimlaneIsEmpty_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            null,
+            "  "
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenSwimlaneExceeds100Characters_ReturnsError()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            null,
+            new string('A', 101)
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Contains("Swimlane must be at most 100 characters long.", errors);
+    }
+
+    [Fact]
+    public async Task Validate_WhenSwimlaneIsValid_ReturnsNoErrors()
+    {
+        // Arrange
+        var command = new CreateTaskCommand(
+            "Valid Title",
+            null,
+            DateTime.Today,
+            Domain.TaskStatus.New,
+            0,
+            null,
+            "Фронтенд"
+        );
+
+        // Act
+        var errors = await _validator.Validate(command, CancellationToken.None);
+
+        // Assert
+        Assert.Empty(errors);
+    }
 }

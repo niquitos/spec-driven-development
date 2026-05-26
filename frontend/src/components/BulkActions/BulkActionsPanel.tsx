@@ -1,29 +1,27 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 
 export function BulkActionsPanel() {
-  const { selectedTaskIds, clearSelection, bulkDelete, bulkMove, selectedDate } = useTaskStore();
-  const [showMoveForm, setShowMoveForm] = useState(false);
-  const [moveDate, setMoveDate] = useState(selectedDate.toISOString().split('T')[0]);
+  const { selectedTaskIds, clearSelection, bulkDelete, bulkMove } = useTaskStore();
+  const hiddenDateInputRef = useRef<HTMLInputElement>(null);
 
   if (selectedTaskIds.length === 0) {
     return null;
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Удалить ${selectedTaskIds.length} выбранных задач?`)) {
-      await bulkDelete();
-    }
+    await bulkDelete();
   };
 
-  const handleBulkMove = async () => {
-    const targetDate = new Date(moveDate);
-    await bulkMove(targetDate);
-    setShowMoveForm(false);
+  const handleMoveButtonClick = () => {
+    hiddenDateInputRef.current?.showPicker?.() ?? hiddenDateInputRef.current?.click();
   };
 
-  const handleCancel = () => {
-    clearSelection();
+  const handleMoveDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.value) return;
+    const targetDate = new Date(e.target.value);
+    bulkMove(targetDate);
+    e.target.value = '';
   };
 
   return (
@@ -33,58 +31,43 @@ export function BulkActionsPanel() {
       </div>
 
       <div className="bulk-actions-controls">
-        {!showMoveForm ? (
-          <>
-            <button
-              onClick={handleBulkDelete}
-              className="btn btn-danger"
-              aria-label={`Удалить ${selectedTaskIds.length} выбранных задач`}
-            >
-              Удалить ({selectedTaskIds.length})
-            </button>
-            <button
-              onClick={() => setShowMoveForm(true)}
-              className="btn btn-primary"
-              aria-label={`Переместить ${selectedTaskIds.length} выбранных задач на другую дату`}
-            >
-              Переместить ({selectedTaskIds.length})
-            </button>
-            <button
-              onClick={handleCancel}
-              className="btn btn-secondary"
-              aria-label="Отменить выбор"
-            >
-              Отмена
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="move-form">
-              <label htmlFor="move-date">Целевая дата:</label>
-              <input
-                id="move-date"
-                type="date"
-                value={moveDate}
-                onChange={(e) => setMoveDate(e.target.value)}
-                aria-label="Выбрать целевую дату для перемещения"
-              />
-              <button
-                onClick={handleBulkMove}
-                className="btn btn-success"
-                aria-label={`Переместить ${selectedTaskIds.length} задач на ${moveDate}`}
-              >
-                Подтвердить
-              </button>
-              <button
-                onClick={() => setShowMoveForm(false)}
-                className="btn btn-secondary"
-                aria-label="Отменить перемещение"
-              >
-                Отмена
-              </button>
-            </div>
-          </>
-        )}
+        <button
+          onClick={handleBulkDelete}
+          className="btn btn-danger"
+          aria-label={`Удалить ${selectedTaskIds.length} выбранных задач`}
+        >
+          Удалить ({selectedTaskIds.length})
+        </button>
+        <button
+          onClick={handleMoveButtonClick}
+          className="btn btn-primary"
+          aria-label={`Переместить ${selectedTaskIds.length} выбранных задач на другую дату`}
+        >
+          Переместить ({selectedTaskIds.length})
+        </button>
+        <button
+          onClick={clearSelection}
+          className="btn btn-secondary"
+          aria-label="Отменить выбор"
+        >
+          Отмена
+        </button>
+        <input
+          ref={hiddenDateInputRef}
+          type="date"
+          onChange={handleMoveDateChange}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            opacity: 0,
+            pointerEvents: 'none',
+            width: 0,
+            height: 0,
+            border: 'none',
+            padding: 0,
+            margin: 0,
+          }}
+        />
       </div>
     </div>
   );

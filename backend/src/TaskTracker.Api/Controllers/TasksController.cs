@@ -12,44 +12,54 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> _getTasksHandler;
     private readonly IRequestHandler<GetTaskByIdQuery, TaskEntity?> _getTaskByIdHandler;
     private readonly IRequestHandler<GetAssigneesQuery, string[]> _getAssigneesHandler;
+    private readonly IRequestHandler<GetSwimlanesQuery, string[]> _getSwimlanesHandler;
     private readonly IRequestHandler<CreateTaskCommand, TaskEntity> _createHandler;
     private readonly IRequestHandler<UpdateTaskCommand> _updateHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
+    private readonly IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> _moveIncompleteToDateHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
 
     public TasksController(
         IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> getTasksHandler,
         IRequestHandler<GetTaskByIdQuery, TaskEntity?> getTaskByIdHandler,
         IRequestHandler<GetAssigneesQuery, string[]> getAssigneesHandler,
+        IRequestHandler<GetSwimlanesQuery, string[]> getSwimlanesHandler,
         IRequestHandler<CreateTaskCommand, TaskEntity> createHandler,
         IRequestHandler<UpdateTaskCommand> updateHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
+        IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> moveIncompleteToDateHandler,
         IValidator<CreateTaskCommand> validator)
     {
         _getTasksHandler = getTasksHandler;
         _getTaskByIdHandler = getTaskByIdHandler;
         _getAssigneesHandler = getAssigneesHandler;
+        _getSwimlanesHandler = getSwimlanesHandler;
         _createHandler = createHandler;
         _updateHandler = updateHandler;
         _deleteHandler = deleteHandler;
         _bulkDeleteHandler = bulkDeleteHandler;
         _bulkMoveHandler = bulkMoveHandler;
+        _moveIncompleteToDateHandler = moveIncompleteToDateHandler;
         _validator = validator;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TaskEntity>>> GetTasks(
         [FromQuery] DateTime date,
-        [FromQuery] string? assignees = null)
+        [FromQuery] string? assignees = null,
+        [FromQuery] string? swimlanes = null)
     {
         var assigneesList = !string.IsNullOrWhiteSpace(assignees)
             ? assignees.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             : null;
-        var tasks = await _getTasksHandler.Handle(new GetTasksQuery(date, assigneesList), CancellationToken.None);
+        var swimlanesList = !string.IsNullOrWhiteSpace(swimlanes)
+            ? swimlanes.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            : null;
+        var tasks = await _getTasksHandler.Handle(new GetTasksQuery(date, assigneesList, swimlanesList), CancellationToken.None);
         return Ok(tasks);
     }
 
@@ -58,6 +68,17 @@ public class TasksController : ControllerBase
     {
         var assignees = await _getAssigneesHandler.Handle(new GetAssigneesQuery(), CancellationToken.None);
         return Ok(assignees);
+    }
+
+    [HttpGet("swimlanes")]
+    public async Task<ActionResult<string[]>> GetSwimlanes([FromQuery] DateTime date)
+    {
+        if (date == default)
+        {
+            return BadRequest("Date parameter is required");
+        }
+        var swimlanes = await _getSwimlanesHandler.Handle(new GetSwimlanesQuery(date), CancellationToken.None);
+        return Ok(swimlanes);
     }
 
     [HttpPost]
@@ -69,7 +90,8 @@ public class TasksController : ControllerBase
             request.Date,
             request.Status ?? Domain.TaskStatus.New,
             request.Order ?? 0,
-            request.Assignee
+            request.Assignee,
+            request.Swimlane
         );
 
         var validationErrors = await _validator.Validate(command, CancellationToken.None);
@@ -103,7 +125,8 @@ public class TasksController : ControllerBase
             request.Date,
             request.Status,
             request.Order,
-            request.Assignee
+            request.Assignee,
+            request.Swimlane
         );
 
         await _updateHandler.Handle(command, CancellationToken.None);
@@ -132,6 +155,14 @@ public class TasksController : ControllerBase
         var result = await _bulkMoveHandler.Handle(command, CancellationToken.None);
         return Ok(result);
     }
+
+    [HttpPost("bulk/move-incomplete")]
+    public async Task<ActionResult<MoveIncompleteToDateResponse>> MoveIncompleteToDate([FromBody] MoveIncompleteToDateRequest request)
+    {
+        var command = new MoveIncompleteToDateCommand(request.TargetDate);
+        var result = await _moveIncompleteToDateHandler.Handle(command, CancellationToken.None);
+        return Ok(result);
+    }
 }
 
 public record CreateTaskRequest(
@@ -140,7 +171,8 @@ public record CreateTaskRequest(
     DateTime Date,
     Domain.TaskStatus? Status,
     int? Order,
-    string? Assignee
+    string? Assignee,
+    string? Swimlane
 );
 
 public record UpdateTaskRequest(
@@ -149,7 +181,8 @@ public record UpdateTaskRequest(
     DateTime Date,
     Domain.TaskStatus Status,
     int Order,
-    string? Assignee
+    string? Assignee,
+    string? Swimlane
 );
 
 public record BulkDeleteRequest(
@@ -158,5 +191,9 @@ public record BulkDeleteRequest(
 
 public record BulkMoveRequest(
     IList<int> TaskIds,
+    DateTime TargetDate
+);
+
+public record MoveIncompleteToDateRequest(
     DateTime TargetDate
 );

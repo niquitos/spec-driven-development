@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useTaskStore } from '../stores/taskStore';
 import { formatDate } from '../utils/date';
 import { AssigneeFilter } from './AssigneeFilter';
@@ -7,7 +8,8 @@ interface HeaderProps {
 }
 
 export function Header({ onNavigate }: HeaderProps) {
-  const { selectedDate, setSelectedDate } = useTaskStore();
+  const { selectedDate, setSelectedDate, isMovingIncomplete, moveIncompleteToDate } = useTaskStore();
+  const hiddenDateInputRef = useRef<HTMLInputElement>(null);
 
   const handlePrevDay = () => {
     const newDate = new Date(selectedDate);
@@ -35,10 +37,21 @@ export function Header({ onNavigate }: HeaderProps) {
     onNavigate?.(newDate);
   };
 
+  const handleMoveButtonClick = () => {
+    hiddenDateInputRef.current?.showPicker?.() ?? hiddenDateInputRef.current?.click();
+  };
+
+  const handleMoveDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.value) return;
+    const targetDate = new Date(e.target.value);
+    moveIncompleteToDate(targetDate);
+    e.target.value = '';
+  };
+
   return (
     <header className="header">
       <button onClick={handlePrevDay} aria-label="Предыдущий день">
-        ←
+        &larr;
       </button>
       <button onClick={handleToday} aria-label="Сегодня">
         Сегодня
@@ -53,8 +66,35 @@ export function Header({ onNavigate }: HeaderProps) {
         <span className="date-label">{formatDate(selectedDate, 'EEEE, MMMM d')}</span>
       </div>
       <button onClick={handleNextDay} aria-label="Следующий день">
-        →
+        &rarr;
       </button>
+
+      <button
+        onClick={handleMoveButtonClick}
+        className="btn btn-move-tomorrow"
+        disabled={isMovingIncomplete}
+        aria-label="Переместить несделанные задачи на другую дату"
+      >
+        {isMovingIncomplete ? 'Перенос...' : 'Переместить несделанные'}
+      </button>
+
+      <input
+        ref={hiddenDateInputRef}
+        type="date"
+        onChange={handleMoveDateChange}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          opacity: 0,
+          pointerEvents: 'none',
+          width: 0,
+          height: 0,
+          border: 'none',
+          padding: 0,
+          margin: 0,
+        }}
+      />
+
       <AssigneeFilter />
     </header>
   );

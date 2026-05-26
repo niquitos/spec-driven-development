@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Task, TaskStatus, CreateTaskDto, UpdateTaskDto } from '../types/task';
 import { taskApi } from '../services/taskApi';
+import { addToast } from '../components/Toast';
+import { normalizeSwimlaneKey } from '../utils/swimlane';
 
 // Получаем дату из URL или возвращаем сегодня
 function getInitialDate(): Date {
@@ -23,6 +25,20 @@ function getInitialAssigneeFilter(): string[] {
     return assigneesParam.split(',').map((a) => a.trim()).filter(Boolean);
   }
   return [];
+}
+
+// Загружаем свёрнутые swimlane из localStorage
+function loadCollapsedSwimlanes(): Set<string> {
+  try {
+    const stored = localStorage.getItem('tasktracker_collapsed_swimlanes');
+    if (stored) {
+      const arr: string[] = JSON.parse(stored);
+      return new Set(arr.map(normalizeSwimlaneKey));
+    }
+  } catch {
+    // Игнорируем ошибки парсинга
+  }
+  return new Set();
 }
 
 // Обновляем URL при изменении даты
@@ -57,6 +73,8 @@ interface TaskState {
   editingTask: Task | null;
   assigneeFilter: string[];
   assigneeList: string[];
+  swimlaneList: string[];
+  collapsedSwimlanes: Set<string>;
 
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
@@ -69,11 +87,15 @@ interface TaskState {
   reorderTask: (id: number, newOrder: number) => void;
   loadTasks: (date: Date) => Promise<void>;
   loadAssigneeList: () => Promise<void>;
+  loadSwimlaneList: () => Promise<void>;
+  toggleSwimlaneCollapse: (swimlaneKey: string) => void;
   createTask: (dto: CreateTaskDto) => Promise<void>;
   setIsCreateModalOpen: (open: boolean) => void;
   setEditingTask: (task: Task | null) => void;
   bulkDelete: () => Promise<void>;
   bulkMove: (targetDate: Date) => Promise<void>;
+  isMovingIncomplete: boolean;
+  moveIncompleteToDate: (targetDate: Date) => Promise<void>;
   setAssigneeFilter: (assignees: string[]) => void;
   getAssigneeList: () => string[];
 }
@@ -88,6 +110,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   editingTask: null,
   assigneeFilter: getInitialAssigneeFilter(),
   assigneeList: [],
+  swimlaneList: [],
+  collapsedSwimlanes: loadCollapsedSwimlanes(),
+  isMovingIncomplete: false,
 
   setTasks: (tasks) => set({ tasks }),
 
@@ -98,7 +123,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const dateStr = date.toISOString().split('T')[0];
       const tasks = await taskApi.getTasks(dateStr, state.assigneeFilter.length > 0 ? state.assigneeFilter : undefined);
       set({ tasks, isLoading: false });
+      if (tasks.length === 0 && state.assigneeFilter.length === 0) {
+        addToast('Нет задач на эту дату', 'info');
+      }
       get().loadAssigneeList();
+      get().loadSwimlaneList();
     } catch (error) {
       set({ error: 'Failed to load tasks', isLoading: false });
     }
@@ -111,6 +140,30 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     } catch {
       // Не фатально
     }
+  },
+
+  loadSwimlaneList: async () => {
+    try {
+      const dateStr = get().selectedDate.toISOString().split('T')[0];
+      const swimlaneList = await taskApi.getSwimlanes(dateStr);
+      set({ swimlaneList });
+    } catch {
+      // Не фатально
+    }
+  },
+
+  toggleSwimlaneCollapse: (swimlaneKey) => {
+    const normalizedKey = normalizeSwimlaneKey(swimlaneKey);
+    set((state) => {
+      const newCollapsed = new Set(state.collapsedSwimlanes);
+      if (newCollapsed.has(normalizedKey)) {
+        newCollapsed.delete(normalizedKey);
+      } else {
+        newCollapsed.add(normalizedKey);
+      }
+      localStorage.setItem('tasktracker_collapsed_swimlanes', JSON.stringify(Array.from(newCollapsed)));
+      return { collapsedSwimlanes: newCollapsed };
+    });
   },
 
   addTask: (task) => {
@@ -186,9 +239,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       status: updates.status ?? task.status,
       order: updates.order ?? task.order,
       assignee: updates.assignee,
+      swimlane: updates.swimlane,
     });
 
     get().loadAssigneeList();
+    get().loadSwimlaneList();
   },
 
   setEditingTask: (task) => set({ editingTask: task }),
@@ -280,6 +335,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   createTask: async (dto) => {
     const task = await taskApi.createTask(dto);
     set((state) => ({ tasks: [...state.tasks, task] }));
+    get().loadSwimlaneList();
   },
 
   setIsCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
@@ -288,25 +344,58 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
 
-    await taskApi.bulkDelete(selectedTaskIds);
-    set((state) => ({
-      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
-      selectedTaskIds: [],
-    }));
-    get().loadAssigneeList();
+    const count = selectedTaskIds.length;
+    try {
+      await taskApi.bulkDelete(selectedTaskIds);
+      set((state) => ({
+        tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+        selectedTaskIds: [],
+      }));
+      get().loadAssigneeList();
+      get().loadSwimlaneList();
+      addToast(`Удалено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
+    } catch {
+      addToast('Ошибка при удалении задач', 'error');
+    }
   },
 
   bulkMove: async (targetDate) => {
     const { selectedTaskIds } = useTaskStore.getState();
     if (selectedTaskIds.length === 0) return;
 
+    const count = selectedTaskIds.length;
     const dateStr = targetDate.toISOString().split('T')[0];
-    await taskApi.bulkMove(selectedTaskIds, dateStr);
-    set((state) => ({
-      tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
-      selectedTaskIds: [],
-    }));
-    get().loadAssigneeList();
+    try {
+      await taskApi.bulkMove(selectedTaskIds, dateStr);
+      set((state) => ({
+        tasks: state.tasks.filter((task) => !state.selectedTaskIds.includes(task.id)),
+        selectedTaskIds: [],
+      }));
+      get().loadAssigneeList();
+      get().loadSwimlaneList();
+      addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
+    } catch {
+      addToast('Ошибка при перемещении задач', 'error');
+    }
+  },
+
+  moveIncompleteToDate: async (targetDate: Date) => {
+    set({ isMovingIncomplete: true });
+    try {
+      const dateStr = targetDate.toISOString().split('T')[0];
+      const result = await taskApi.moveIncompleteToDate(dateStr);
+      if (result.moved > 0) {
+        const count = result.moved;
+        addToast(`Перенесено ${count} ${count === 1 ? 'задача' : count < 5 ? 'задачи' : 'задач'}`);
+        await get().loadTasks(get().selectedDate);
+      } else {
+        addToast('Нет задач для переноса', 'info');
+      }
+    } catch {
+      addToast('Ошибка при переносе задач', 'error');
+    } finally {
+      set({ isMovingIncomplete: false });
+    }
   },
 
   setAssigneeFilter: (assignees) => {
@@ -319,6 +408,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       .then((tasks) => {
         set({ tasks });
         get().loadAssigneeList();
+        get().loadSwimlaneList();
       })
       .catch(() => {});
   },

@@ -50,6 +50,10 @@ namespace TaskTracker.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Swimlane")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -61,6 +65,8 @@ namespace TaskTracker.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Date", "Status");
+
+                    b.HasIndex("Date", "Swimlane");
 
                     b.ToTable("tasks", (string)null);
                 });
