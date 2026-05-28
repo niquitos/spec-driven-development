@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Column } from '../../src/components/Column';
 import { TaskStatus } from '../../src/types/task';
 import { useTaskStore } from '../../src/stores/taskStore';
@@ -8,11 +9,19 @@ vi.mock('../../src/stores/taskStore', () => ({
   useTaskStore: vi.fn(),
 }));
 
+const renderWithDnD = (ui: React.ReactElement) => {
+  return render(
+    <DragDropContext onDragEnd={() => {}}>
+      {ui}
+    </DragDropContext>
+  );
+};
+
 describe('DragDrop Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useTaskStore as any).mockReturnValue({
-      tasks: [] as Task[],
+      tasks: [],
       selectedDate: new Date('2026-05-09'),
       selectedTaskIds: [],
       isLoading: false,
@@ -36,20 +45,23 @@ describe('DragDrop Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
   });
 
   it('renders column with droppable area', () => {
-    render(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
+    renderWithDnD(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
 
     const column = document.querySelector('.column');
     expect(column).toBeTruthy();
   });
 
   it('renders column with add button', () => {
-    render(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
+    renderWithDnD(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
 
-    const addButton = document.querySelector('button[aria-label="Add task to Новые"]');
+    const addButton = screen.getByRole('button', { name: /Добавить задачу/ });
     expect(addButton).toBeTruthy();
   });
 });

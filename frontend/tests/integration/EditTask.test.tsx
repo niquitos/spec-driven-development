@@ -49,6 +49,8 @@ describe('EditTask Integration', () => {
     order: 0,
     createdAt: '2026-05-09T10:00:00Z',
     updatedAt: '2026-05-09T10:00:00Z',
+    assignee: null,
+    swimlane: null,
   };
 
   const renderModal = (task: Task | null = mockTask) => {
@@ -97,6 +99,7 @@ describe('EditTask Integration', () => {
         date: '2026-05-10',
         status: 0,
         assignee: undefined,
+        swimlane: null,
       });
     });
   });

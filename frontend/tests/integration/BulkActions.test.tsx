@@ -28,34 +28,40 @@ describe('BulkActions Integration', () => {
 
   const mockTasks = [
     {
-      id: '1',
+      id: 1,
       title: 'Task 1',
       description: 'Description 1',
       status: TaskStatus.New,
       date: '2026-05-09',
       order: 0,
       createdAt: '2026-05-09T10:00:00Z',
-      updatedAt: null,
+      updatedAt: '2026-05-09T10:00:00Z',
+      assignee: null,
+      swimlane: null,
     },
     {
-      id: '2',
+      id: 2,
       title: 'Task 2',
       description: 'Description 2',
       status: TaskStatus.New,
       date: '2026-05-09',
       order: 1,
       createdAt: '2026-05-09T10:00:00Z',
-      updatedAt: null,
+      updatedAt: '2026-05-09T10:00:00Z',
+      assignee: null,
+      swimlane: null,
     },
     {
-      id: '3',
+      id: 3,
       title: 'Task 3',
       description: 'Description 3',
       status: TaskStatus.InProgress,
       date: '2026-05-09',
       order: 0,
       createdAt: '2026-05-09T10:00:00Z',
-      updatedAt: null,
+      updatedAt: '2026-05-09T10:00:00Z',
+      assignee: null,
+      swimlane: null,
     },
   ];
 
@@ -86,6 +92,9 @@ describe('BulkActions Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
   });
 
@@ -118,17 +127,17 @@ describe('BulkActions Integration', () => {
     });
   });
 
-  it('should call bulkMove when move confirm button is clicked', async () => {
+  it('should call bulkMove when date is selected for move', async () => {
     render(<BulkActionsPanel />);
 
     const moveButton = screen.getByRole('button', { name: /Переместить/i });
     fireEvent.click(moveButton);
 
-    const confirmButton = screen.getByRole('button', { name: /Переместить.*задач/i });
-    fireEvent.click(confirmButton);
+    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+    fireEvent.change(dateInput, { target: { value: '2026-06-01' } });
 
     await waitFor(() => {
-      expect(mockBulkMove).toHaveBeenCalled();
+      expect(mockBulkMove).toHaveBeenCalledWith(expect.any(Date));
     });
   });
 
@@ -168,6 +177,9 @@ describe('BulkActions Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
 
     const { container } = render(<BulkActionsPanel />);

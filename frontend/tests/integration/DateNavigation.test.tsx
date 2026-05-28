@@ -26,6 +26,9 @@ vi.mock('../../src/stores/taskStore', () => ({
     assigneeFilter: [],
     setAssigneeFilter: vi.fn(),
     getAssigneeList: vi.fn(() => []),
+    swimlaneList: [],
+    collapsedSwimlanes: new Set(),
+    toggleSwimlaneCollapse: vi.fn(),
   })),
 }));
 
@@ -54,6 +57,9 @@ describe('DateNavigation Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
   });
 
@@ -101,6 +107,8 @@ describe('DateNavigation Integration', () => {
         order: 0,
         createdAt: '2026-05-09T10:00:00Z',
         updatedAt: '2026-05-09T10:00:00Z',
+        assignee: null,
+        swimlane: null,
       },
     ];
 
@@ -114,6 +122,8 @@ describe('DateNavigation Integration', () => {
         order: 0,
         createdAt: '2026-05-10T10:00:00Z',
         updatedAt: '2026-05-10T10:00:00Z',
+        assignee: null,
+        swimlane: null,
       },
     ];
 
@@ -136,6 +146,9 @@ describe('DateNavigation Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
 
     render(<Board />);

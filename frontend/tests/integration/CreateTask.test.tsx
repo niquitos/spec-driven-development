@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Column } from '../../src/components/Column';
 import { useTaskStore } from '../../src/stores/taskStore';
 import { TaskStatus } from '../../src/types/task';
@@ -8,6 +9,14 @@ import { CreateTaskModal } from '../../src/components/TaskModal/CreateTaskModal'
 vi.mock('../../src/stores/taskStore', () => ({
   useTaskStore: vi.fn(),
 }));
+
+const renderWithDnD = (ui: React.ReactElement) => {
+  return render(
+    <DragDropContext onDragEnd={() => {}}>
+      {ui}
+    </DragDropContext>
+  );
+};
 
 describe('CreateTask Integration', () => {
   const mockCreateTask = vi.fn();
@@ -37,6 +46,9 @@ describe('CreateTask Integration', () => {
       assigneeFilter: [],
       setAssigneeFilter: vi.fn(),
       getAssigneeList: vi.fn(() => []),
+      swimlaneList: [],
+      collapsedSwimlanes: new Set(),
+      toggleSwimlaneCollapse: vi.fn(),
     });
   });
 
@@ -63,9 +75,9 @@ describe('CreateTask Integration', () => {
   };
 
   it('opens create modal when clicking + button', () => {
-    const { container } = render(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
+    const { container } = renderWithDnD(<Column status={TaskStatus.New} title="Новые" tasks={[]} />);
 
-    const addButton = container.querySelector('button[aria-label="Add task to Новые"]');
+    const addButton = screen.getByRole('button', { name: /Добавить задачу/ });
     if (addButton) {
       fireEvent.click(addButton);
     }
