@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application;
 using TaskTracker.Application.Tasks;
@@ -15,11 +16,13 @@ public class TasksController : ControllerBase
     private readonly IRequestHandler<GetSwimlanesQuery, string[]> _getSwimlanesHandler;
     private readonly IRequestHandler<CreateTaskCommand, TaskEntity> _createHandler;
     private readonly IRequestHandler<UpdateTaskCommand> _updateHandler;
+    private readonly IRequestHandler<PatchTaskCommand> _patchHandler;
     private readonly IRequestHandler<DeleteTaskCommand> _deleteHandler;
     private readonly IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> _bulkDeleteHandler;
     private readonly IRequestHandler<BulkMoveCommand, BulkMoveResponse> _bulkMoveHandler;
     private readonly IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> _moveIncompleteToDateHandler;
     private readonly IValidator<CreateTaskCommand> _validator;
+    private readonly IValidator<PatchTaskCommand> _patchValidator;
 
     public TasksController(
         IRequestHandler<GetTasksQuery, IEnumerable<TaskEntity>> getTasksHandler,
@@ -28,11 +31,13 @@ public class TasksController : ControllerBase
         IRequestHandler<GetSwimlanesQuery, string[]> getSwimlanesHandler,
         IRequestHandler<CreateTaskCommand, TaskEntity> createHandler,
         IRequestHandler<UpdateTaskCommand> updateHandler,
+        IRequestHandler<PatchTaskCommand> patchHandler,
         IRequestHandler<DeleteTaskCommand> deleteHandler,
         IRequestHandler<BulkDeleteCommand, BulkDeleteResponse> bulkDeleteHandler,
         IRequestHandler<BulkMoveCommand, BulkMoveResponse> bulkMoveHandler,
         IRequestHandler<MoveIncompleteToDateCommand, MoveIncompleteToDateResponse> moveIncompleteToDateHandler,
-        IValidator<CreateTaskCommand> validator)
+        IValidator<CreateTaskCommand> validator,
+        IValidator<PatchTaskCommand> patchValidator)
     {
         _getTasksHandler = getTasksHandler;
         _getTaskByIdHandler = getTaskByIdHandler;
@@ -40,11 +45,13 @@ public class TasksController : ControllerBase
         _getSwimlanesHandler = getSwimlanesHandler;
         _createHandler = createHandler;
         _updateHandler = updateHandler;
+        _patchHandler = patchHandler;
         _deleteHandler = deleteHandler;
         _bulkDeleteHandler = bulkDeleteHandler;
         _bulkMoveHandler = bulkMoveHandler;
         _moveIncompleteToDateHandler = moveIncompleteToDateHandler;
         _validator = validator;
+        _patchValidator = patchValidator;
     }
 
     [HttpGet]
@@ -133,6 +140,30 @@ public class TasksController : ControllerBase
         return NoContent();
     }
 
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> PatchTask(int id, [FromBody] PatchTaskRequest request)
+    {
+        var command = new PatchTaskCommand(
+            id,
+            request.Title,
+            request.Description,
+            request.Status,
+            request.Date,
+            request.Order,
+            request.Assignee,
+            request.Swimlane
+        );
+
+        var validationErrors = await _patchValidator.Validate(command, CancellationToken.None);
+        if (validationErrors.Any())
+        {
+            return BadRequest(validationErrors);
+        }
+
+        await _patchHandler.Handle(command, CancellationToken.None);
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTask(int id)
     {
@@ -183,6 +214,17 @@ public record UpdateTaskRequest(
     int Order,
     string? Assignee,
     string? Swimlane
+);
+
+public record PatchTaskRequest(
+    string? Title = null,
+    string? Description = null,
+    [property: JsonConverter(typeof(JsonStringEnumConverter))]
+    Domain.TaskStatus? Status = null,
+    DateTime? Date = null,
+    int? Order = null,
+    string? Assignee = null,
+    string? Swimlane = null
 );
 
 public record BulkDeleteRequest(
