@@ -123,4 +123,65 @@ public class PatchTaskTests : IntegrationTestBase
         var task = await GetTaskByIdAsync(taskId);
         Assert.Equal("Новый", task.GetProperty("swimlane").GetString());
     }
+
+    [Fact]
+    public async Task PatchTask_MultipleFields_UpdatesAll()
+    {
+        var taskId = await CreateTaskAndGetIdAsync("Original", swimlane: "Старый", assignee: "Анна");
+
+        var patchData = new { title = "Updated Title", status = "Done", swimlane = "Новый" };
+        var response = await Client.PatchAsync($"/api/tasks/{taskId}", JsonContent.Create(patchData));
+
+        response.EnsureSuccessStatusCode();
+
+        var task = await GetTaskByIdAsync(taskId);
+        Assert.Equal("Updated Title", task.GetProperty("title").GetString());
+        Assert.Equal((int)Domain.TaskStatus.Done, task.GetProperty("status").GetInt32());
+        Assert.Equal("Новый", task.GetProperty("swimlane").GetString());
+        Assert.Equal("Анна", task.GetProperty("assignee").GetString());
+    }
+
+    [Fact]
+    public async Task PatchTask_NormalizesWhitespaceSwimlane()
+    {
+        var taskId = await CreateTaskAndGetIdAsync("Task", swimlane: "Старый");
+
+        var patchData = new { swimlane = "   " };
+        var response = await Client.PatchAsync($"/api/tasks/{taskId}", JsonContent.Create(patchData));
+
+        response.EnsureSuccessStatusCode();
+
+        var task = await GetTaskByIdAsync(taskId);
+        Assert.True(task.GetProperty("swimlane").ValueKind == JsonValueKind.Null
+            || string.IsNullOrEmpty(task.GetProperty("swimlane").GetString()));
+    }
+
+    [Fact]
+    public async Task PatchTask_NormalizesWhitespaceAssignee()
+    {
+        var taskId = await CreateTaskAndGetIdAsync("Task", assignee: "Анна");
+
+        var patchData = new { assignee = "   " };
+        var response = await Client.PatchAsync($"/api/tasks/{taskId}", JsonContent.Create(patchData));
+
+        response.EnsureSuccessStatusCode();
+
+        var task = await GetTaskByIdAsync(taskId);
+        Assert.True(task.GetProperty("assignee").ValueKind == JsonValueKind.Null
+            || string.IsNullOrEmpty(task.GetProperty("assignee").GetString()));
+    }
+
+    [Fact]
+    public async Task PatchTask_UpdatesTitle()
+    {
+        var taskId = await CreateTaskAndGetIdAsync("Old Title");
+
+        var patchData = new { title = "New Title" };
+        var response = await Client.PatchAsync($"/api/tasks/{taskId}", JsonContent.Create(patchData));
+
+        response.EnsureSuccessStatusCode();
+
+        var task = await GetTaskByIdAsync(taskId);
+        Assert.Equal("New Title", task.GetProperty("title").GetString());
+    }
 }
