@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 
 interface SwimlaneComboboxProps {
   value: string;
@@ -15,6 +15,10 @@ export const SwimlaneCombobox: React.FC<SwimlaneComboboxProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 

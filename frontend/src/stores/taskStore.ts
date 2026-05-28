@@ -278,6 +278,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     if (!task) return;
 
     const dateStr = state.selectedDate.toISOString().split('T')[0];
+    const originalTasks = [...state.tasks];
 
     // Все задачи этой даты
     const dateTasks = state.tasks.filter(t =>
@@ -311,15 +312,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     set({ tasks: newTasks });
 
-    // Отправляем на бекенд
-    await taskApi.updateTask(id, {
-      title: task.title,
-      description: task.description ?? undefined,
-      date: task.date,
-      status: newStatus,
-      order: insertIndex,
-      assignee: task.assignee ?? undefined,
-    });
+    try {
+      await taskApi.patchTask(id, {
+        status: newStatus,
+        order: insertIndex,
+        swimlane: task.swimlane ?? null,
+      });
+    } catch {
+      set({ tasks: originalTasks });
+      addToast('Ошибка при перемещении задачи', 'error');
+    }
 
     get().loadAssigneeList();
   },

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Task, CreateTaskDto, UpdateTaskDto } from '../types/task';
+import { Task, CreateTaskDto, UpdateTaskDto, PatchTaskDto } from '../types/task';
 
 const api = axios.create({
   baseURL: '/api',
@@ -25,6 +25,10 @@ export const taskApi = {
 
   async updateTask(id: number, dto: UpdateTaskDto): Promise<void> {
     await api.put(`/tasks/${id}`, dto);
+  },
+
+  async patchTask(id: number, dto: PatchTaskDto): Promise<void> {
+    await api.patch(`/tasks/${id}`, dto);
   },
 
   async deleteTask(id: number): Promise<void> {

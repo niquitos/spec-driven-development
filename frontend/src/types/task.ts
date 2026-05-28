@@ -36,3 +36,13 @@ export interface UpdateTaskDto {
   assignee?: string;
   swimlane?: string | null;
 }
+
+export interface PatchTaskDto {
+  title?: string;
+  description?: string | null;
+  status?: TaskStatus;
+  date?: string;
+  order?: number;
+  assignee?: string | null;
+  swimlane?: string | null;
+}
